@@ -1,4 +1,4 @@
-package org.gp.newspinbe.global;
+package org.gp.newspinbe.global.common;
 
 import java.time.LocalDateTime;
 
