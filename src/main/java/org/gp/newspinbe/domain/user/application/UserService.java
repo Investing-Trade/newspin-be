@@ -44,4 +44,16 @@ public class UserService {
 		userRepository.save(user);
 	}
 
+	@Transactional
+	public SignInResponse signIn(SignInRequest signInRequest) {
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(signInRequest.getEmail(), signInRequest.getPassword());
+
+		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+		JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+		return new SignInResponse(jwtToken);
+	}
+
+
 }

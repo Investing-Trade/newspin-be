@@ -12,6 +12,7 @@ public enum ErrorCode {
 	INVALID_INPUT_VALUE("C002", "유효하지 않은 입력 값입니다.", HttpStatus.BAD_REQUEST),
 	INVALID_TYPE_VALUE("C003", "요청 데이터 타입이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
 	MISSING_REQUIRED_FIELD("C004", "필수 입력 항목이 누락되었습니다.", HttpStatus.BAD_REQUEST),
+	INVALID_REFRESHTOKEN("C005", "유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST),
 
 	// HTTP 401 Unauthorized
 	UNAUTHORIZED_ACCESS("C101", "인증 정보가 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
@@ -23,7 +24,11 @@ public enum ErrorCode {
 
 	// Internal Server Error
 	INTERNAL_SERVER_ERROR("C999", "서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-	EXTERNAL_SERVICE_ERROR("C901", "외부 서비스 연동 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+	EXTERNAL_SERVICE_ERROR("C901", "외부 서비스 연동 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+	// User
+	USER_DUPLICATED("U001", "이미 존재하는 유저입니다.", HttpStatus.CONFLICT);
+
 
 
 	private final HttpStatus status;
