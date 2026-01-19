@@ -35,9 +35,6 @@ public class SecurityConfig {
 
 	private final JwtTokenProvider jwtTokenProvider;
 
-	@Value( "${server.url}")
-	private String SERVER_URL;
-
 	private static final String[] PERMIT_ALL_PATTERNS = {
 		"/auth/sign-up",
 		"/auth/sign-in",
@@ -45,9 +42,6 @@ public class SecurityConfig {
 		"/swagger-ui/**",
 		"/v3/api-docs/**"
 	};
-
-	@Value("${cors.url}")
-	private String FRONT_URL;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity ) throws Exception {
@@ -87,9 +81,7 @@ public class SecurityConfig {
 		corsConfiguration.setAllowCredentials(true);
 		corsConfiguration.setAllowedOrigins(List.of(
 			"http://localhost:5173",
-			"http://127.0.0.1:5173",
-			SERVER_URL,
-			FRONT_URL
+			"http://127.0.0.1:5173"
 		));
 
 		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
