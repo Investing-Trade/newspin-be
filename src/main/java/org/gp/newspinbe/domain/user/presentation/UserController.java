@@ -37,4 +37,19 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(
+		@RequestHeader("Authorization") String accessToken
+	) {
+		userService.logout(accessToken);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<SignInResponse> refresh(
+		@RequestBody RefreshRequest refreshRequest
+	) {
+		SignInResponse response = userService.refresh(refreshRequest);
+		return ResponseEntity.ok(response);
+	}
 }
