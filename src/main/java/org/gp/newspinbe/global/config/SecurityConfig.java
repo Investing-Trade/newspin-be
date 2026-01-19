@@ -1,4 +1,4 @@
-package org.gp.newspinbe.global.security;
+package org.gp.newspinbe.global.config;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.gp.newspinbe.global.security.jwt.JwtAuthenticationFilter;
 import org.gp.newspinbe.global.security.jwt.JwtExceptionFilter;
 import org.gp.newspinbe.global.security.jwt.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,9 +35,9 @@ public class SecurityConfig {
 	private final JwtTokenProvider jwtTokenProvider;
 
 	private static final String[] PERMIT_ALL_PATTERNS = {
-		"/auth/sign-up",
-		"/auth/sign-in",
-		"/auth/refresh",
+		"/user/sign-up",
+		"/user/sign-in",
+		"/user/refresh",
 		"/swagger-ui/**",
 		"/v3/api-docs/**"
 	};

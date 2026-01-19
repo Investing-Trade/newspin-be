@@ -34,7 +34,6 @@ public class JwtTokenProvider {
 
 	private final RedisUtil redisUtil;
 	private final Key key;
-	private final UserDetailsService userDetailsService;
 
 	private static final String GRANT_TYPE = "Bearer";
 
@@ -46,13 +45,11 @@ public class JwtTokenProvider {
 
 	public JwtTokenProvider(
 		@Value("${spring.jwt.secret}") String secretKey,
-		RedisUtil redisUtil,
-		UserDetailsService userDetailsService
+		RedisUtil redisUtil
 	) {
 		this.redisUtil = redisUtil;
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.key = Keys.hmacShaKeyFor(keyBytes);
-		this.userDetailsService = userDetailsService;
 	}
 
 	public JwtToken generateToken(Authentication authentication) {
