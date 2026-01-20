@@ -36,6 +36,15 @@ public class UserController {
 		return ResponseEntity.ok(ApiResponse.success());
 	}
 
+	@PostMapping("/email/verify")
+	public ResponseEntity<ApiResponse<EmailVerificationResponse>> verifyEmail(
+		@RequestBody @Valid EmailVerificationRequest emailVerificationRequest
+	) {
+		EmailVerificationResponse emailVerificationResponse = userService.verifyEmail(
+			emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
+		return ResponseEntity.ok(ApiResponse.success(emailVerificationResponse));
+	}
+
 	@PostMapping("/sign-up")
 	public ResponseEntity<ApiResponse<Void>> signUp(
 		@RequestBody @Valid SignUpRequest signUpRequest

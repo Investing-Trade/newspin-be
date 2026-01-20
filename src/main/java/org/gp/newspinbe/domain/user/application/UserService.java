@@ -12,6 +12,7 @@ import org.gp.newspinbe.domain.user.domain.User;
 import org.gp.newspinbe.domain.user.dto.request.RefreshRequest;
 import org.gp.newspinbe.domain.user.dto.request.SignInRequest;
 import org.gp.newspinbe.domain.user.dto.request.SignUpRequest;
+import org.gp.newspinbe.domain.user.dto.response.EmailVerificationResponse;
 import org.gp.newspinbe.domain.user.dto.response.SignInResponse;
 import org.gp.newspinbe.domain.user.repository.UserRepository;
 import org.gp.newspinbe.global.exception.CustomException;
@@ -66,6 +67,22 @@ public class UserService {
 		}
 	}
 
+	public EmailVerificationResponse verifyEmail(String email, String code) {
+		if (redisUtil.existData(email)) {
+			String result = redisUtil.getData(email);
+			if (result.equals(code)) {
+				return EmailVerificationResponse.builder().verified(true).message("인증 성공하였습니다.").build();
+			} else {
+				return EmailVerificationResponse.builder()
+					.verified(false)
+					.message(result)
+					.message("인증번호가 일치하지 않습니다")
+					.build();
+			}
+		} else {
+			return EmailVerificationResponse.builder().verified(false).message("인증번호가 만료되었습니다. 다시 시도해주세요.").build();
+		}
+	}
 
 	@Transactional
 	public void signUp(SignUpRequest signUpRequest) {
