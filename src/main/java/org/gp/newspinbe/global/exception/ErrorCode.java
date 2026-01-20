@@ -27,7 +27,8 @@ public enum ErrorCode {
 	EXTERNAL_SERVICE_ERROR("C901", "외부 서비스 연동 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
 	// User
-	USER_DUPLICATED("U001", "이미 존재하는 유저입니다.", HttpStatus.CONFLICT);
+	USER_DUPLICATED("U001", "이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
+	EMAIL_DUPLICATION("U002", "이미 존재하는 이메일입니다.", HttpStatus.CONFLICT);
 
 
 

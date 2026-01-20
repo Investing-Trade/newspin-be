@@ -29,22 +29,23 @@ spring:
     refresh-token:
       expire-time: 259200000
 
+  mail:
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
 logging:
   level:
     org.hibernate.sql: debug
 
 server:
   url: ${SERVER_URL}
-
-mail:
-  username: ${SPRING_MAIL_USERNAME}
-  password: ${SPRING_MAIL_PASSWORD}
-  properties:
-    mail:
-      smtp:
-        auth: true
-        starttls:
-          enable: true
 
 ---
 spring:

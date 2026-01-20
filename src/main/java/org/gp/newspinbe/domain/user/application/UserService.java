@@ -1,6 +1,12 @@
 package org.gp.newspinbe.domain.user.application;
 
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.gp.newspinbe.domain.user.domain.User;
 import org.gp.newspinbe.domain.user.dto.request.RefreshRequest;
@@ -13,6 +19,7 @@ import org.gp.newspinbe.global.exception.ErrorCode;
 import org.gp.newspinbe.global.security.CustomUserDetails;
 import org.gp.newspinbe.global.security.jwt.JwtToken;
 import org.gp.newspinbe.global.security.jwt.JwtTokenProvider;
+import org.gp.newspinbe.global.util.RedisUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -24,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -32,6 +40,32 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
+	private final RedisUtil redisUtil;
+	private final EmailService emailService;
+
+	private final Long EXPIRATION = 10 * 60L;
+	private final Long REFRESH_TOKEN_EXPIRE_SECONDS = 7 * 24 * 60 * 60L;
+
+	public void sendVerificationEmail(String email) {
+		Optional<User> user = userRepository.findByEmail(email);
+		if (user.isPresent()) {
+			throw new CustomException(ErrorCode.EMAIL_DUPLICATION);
+		}
+
+		String title = "NEWPIN 서비스 회원가입 인증 메일";
+		String code = generateRandomCode();
+		String text = "인증번호: " + code;
+
+		redisUtil.setDataExpire(email, code, EXPIRATION);
+
+		try {
+			emailService.sendEmail(email, title, text);
+		} catch (Exception e) {
+			log.error("Error: {}", e);
+			throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+		}
+	}
+
 
 	@Transactional
 	public void signUp(SignUpRequest signUpRequest) {
@@ -88,5 +122,28 @@ public class UserService {
 			"",
 			userDetails.getAuthorities()
 		);
+	}
+
+	private String generateRandomCode() {
+		final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		final String NUMBERS = "0123456789";
+		SecureRandom random = new java.security.SecureRandom();
+		List<Character> chars = new java.util.ArrayList<>();
+
+		for (int i = 0; i < 3; i++) {
+			chars.add(LETTERS.charAt(random.nextInt(LETTERS.length())));
+		}
+		for (int i = 0; i < 3; i++) {
+			chars.add(NUMBERS.charAt(random.nextInt(NUMBERS.length())));
+		}
+
+		Collections.shuffle(chars, random);
+
+		StringBuilder sb = new StringBuilder();
+		for (char c : chars) {
+			sb.append(c);
+		}
+
+		return sb.toString();
 	}
 }
