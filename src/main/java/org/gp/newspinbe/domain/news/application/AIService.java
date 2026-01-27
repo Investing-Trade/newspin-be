@@ -37,10 +37,6 @@ public class AIService {
                 return aiAnalysisResponse;
         }
 
-        /**
-         * [임시 구현] Mock AI 응답 생성
-         * 실제 AI 서비스 연동 시 이 메서드를 대체하면 됩니다.
-         */
         // TODO: Mock AI 응답 생성 - 실제 AI 서비스 연동 필요
         private AIAnalysisResponse generateMockAIResponse(NewsSentiment userSentiment, String userReason,
                         NewsArticle newsArticle) {

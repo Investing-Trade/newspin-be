@@ -12,7 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -27,13 +26,13 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @Component
 public class JwtTokenProvider {
 
 	private final RedisUtil redisUtil;
 	private final Key key;
+	private final UserDetailsService userDetailsService;
 
 	private static final String GRANT_TYPE = "Bearer";
 
@@ -44,18 +43,19 @@ public class JwtTokenProvider {
 	private long REFRESH_TOKEN_EXPIRE_TIME;
 
 	public JwtTokenProvider(
-		@Value("${spring.jwt.secret}") String secretKey,
-		RedisUtil redisUtil
-	) {
+			@Value("${spring.jwt.secret}") String secretKey,
+			RedisUtil redisUtil,
+			UserDetailsService userDetailsService) {
 		this.redisUtil = redisUtil;
+		this.userDetailsService = userDetailsService;
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.key = Keys.hmacShaKeyFor(keyBytes);
 	}
 
 	public JwtToken generateToken(Authentication authentication) {
 		String authorities = authentication.getAuthorities().stream()
-			.map(GrantedAuthority::getAuthority)
-			.collect(Collectors.joining(","));
+				.map(GrantedAuthority::getAuthority)
+				.collect(Collectors.joining(","));
 
 		long now = (new Date()).getTime();
 		String username = authentication.getName();
@@ -72,27 +72,27 @@ public class JwtTokenProvider {
 		redisUtil.setDataExpire(username, refreshToken, REFRESH_TOKEN_EXPIRE_TIME);
 
 		return JwtToken.builder()
-			.grantType(GRANT_TYPE)
-			.accessToken(accessToken)
-			.refreshToken(refreshToken)
-			.build();
+				.grantType(GRANT_TYPE)
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.build();
 	}
 
 	private String generateAccessToken(String username, String authorities, Date expireDate) {
 		return Jwts.builder()
-			.setSubject(username)
-			.claim("auth", authorities)
-			.setExpiration(expireDate)
-			.signWith(key, SignatureAlgorithm.HS256)
-			.compact();
+				.setSubject(username)
+				.claim("auth", authorities)
+				.setExpiration(expireDate)
+				.signWith(key, SignatureAlgorithm.HS256)
+				.compact();
 	}
 
 	private String generateRefreshToken(String username, Date expireDate) {
 		return Jwts.builder()
-			.setSubject(username)
-			.setExpiration(expireDate)
-			.signWith(key, SignatureAlgorithm.HS256)
-			.compact();
+				.setSubject(username)
+				.setExpiration(expireDate)
+				.signWith(key, SignatureAlgorithm.HS256)
+				.compact();
 	}
 
 	public Authentication getAuthentication(String accessToken) {
@@ -102,20 +102,22 @@ public class JwtTokenProvider {
 		}
 
 		Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
-			.map(SimpleGrantedAuthority::new)
-			.toList();
+				.map(SimpleGrantedAuthority::new)
+				.toList();
 
-		UserDetails principal = new User(claims.getSubject(), "", authorities);
-		return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+		String username = claims.getSubject();
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 	}
 
 	private Claims parseClaims(String accessToken) {
 		try {
 			return Jwts.parserBuilder()
-				.setSigningKey(key)
-				.build()
-				.parseClaimsJws(accessToken)
-				.getBody();
+					.setSigningKey(key)
+					.build()
+					.parseClaimsJws(accessToken)
+					.getBody();
 		} catch (ExpiredJwtException e) {
 			return e.getClaims();
 		}
@@ -124,9 +126,9 @@ public class JwtTokenProvider {
 	public boolean validateToken(String token) {
 		try {
 			Jwts.parserBuilder()
-				.setSigningKey(key)
-				.build()
-				.parseClaimsJws(token);
+					.setSigningKey(key)
+					.build()
+					.parseClaimsJws(token);
 
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
@@ -142,7 +144,8 @@ public class JwtTokenProvider {
 	}
 
 	public boolean validateRefreshToken(String token) {
-		if (!validateToken(token)) return false;
+		if (!validateToken(token))
+			return false;
 
 		try {
 			String username = getUserNameFromToken(token);
@@ -157,10 +160,10 @@ public class JwtTokenProvider {
 	public String getUserNameFromToken(String token) {
 		try {
 			Claims claims = Jwts.parserBuilder()
-				.setSigningKey(key)
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
+					.setSigningKey(key)
+					.build()
+					.parseClaimsJws(token)
+					.getBody();
 
 			return claims.getSubject();
 		} catch (ExpiredJwtException e) {
