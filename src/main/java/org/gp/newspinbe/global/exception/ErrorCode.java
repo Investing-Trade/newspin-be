@@ -28,9 +28,11 @@ public enum ErrorCode {
 
 	// User
 	USER_DUPLICATED("U001", "이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
-	EMAIL_DUPLICATION("U002", "이미 존재하는 이메일입니다.", HttpStatus.CONFLICT);
+	EMAIL_DUPLICATION("U002", "이미 존재하는 이메일입니다.", HttpStatus.CONFLICT),
+	USER_NOT_FOUND("U003", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
-
+	// News
+	NEWS_NOT_FOUND("N001", "뉴스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
 	private final HttpStatus status;
 	private final String code;
