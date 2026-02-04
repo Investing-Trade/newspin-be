@@ -14,6 +14,7 @@ import org.gp.newspinbe.domain.user.dto.request.SignInRequest;
 import org.gp.newspinbe.domain.user.dto.request.SignUpRequest;
 import org.gp.newspinbe.domain.user.dto.response.EmailVerificationResponse;
 import org.gp.newspinbe.domain.user.dto.response.SignInResponse;
+import org.gp.newspinbe.domain.user.dto.response.UserDetailResponse;
 import org.gp.newspinbe.domain.user.repository.UserRepository;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
@@ -29,8 +30,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 
 @Slf4j
 @Service
@@ -74,10 +73,10 @@ public class UserService {
 				return EmailVerificationResponse.builder().verified(true).message("인증 성공하였습니다.").build();
 			} else {
 				return EmailVerificationResponse.builder()
-					.verified(false)
-					.message(result)
-					.message("인증번호가 일치하지 않습니다")
-					.build();
+						.verified(false)
+						.message(result)
+						.message("인증번호가 일치하지 않습니다")
+						.build();
 			}
 		} else {
 			return EmailVerificationResponse.builder().verified(false).message("인증번호가 만료되었습니다. 다시 시도해주세요.").build();
@@ -97,7 +96,8 @@ public class UserService {
 
 	@Transactional
 	public SignInResponse signIn(SignInRequest signInRequest) {
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(signInRequest.getEmail(), signInRequest.getPassword());
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+				signInRequest.getEmail(), signInRequest.getPassword());
 
 		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -130,15 +130,22 @@ public class UserService {
 
 	private Authentication getAuthenticationForRefresh(String username) {
 		User user = userRepository.findByEmail(username)
-			.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
 		UserDetails userDetails = new CustomUserDetails(user);
 
 		return new UsernamePasswordAuthenticationToken(
-			userDetails,
-			"",
-			userDetails.getAuthorities()
-		);
+				userDetails,
+				"",
+				userDetails.getAuthorities());
+	}
+
+	@Transactional(readOnly = true)
+	public UserDetailResponse getUserDetail(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		return UserDetailResponse.from(user);
 	}
 
 	private String generateRandomCode() {

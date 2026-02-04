@@ -7,8 +7,12 @@ import org.gp.newspinbe.domain.user.dto.request.SignInRequest;
 import org.gp.newspinbe.domain.user.dto.request.SignUpRequest;
 import org.gp.newspinbe.domain.user.dto.response.EmailVerificationResponse;
 import org.gp.newspinbe.domain.user.dto.response.SignInResponse;
+import org.gp.newspinbe.domain.user.dto.response.UserDetailResponse;
 import org.gp.newspinbe.global.common.ApiResponse;
+import org.gp.newspinbe.global.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -41,7 +45,7 @@ public class UserController {
 		@RequestBody @Valid EmailVerificationRequest emailVerificationRequest
 	) {
 		EmailVerificationResponse emailVerificationResponse = userService.verifyEmail(
-			emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
+				emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
 		return ResponseEntity.ok(ApiResponse.success(emailVerificationResponse));
 	}
 
@@ -74,6 +78,14 @@ public class UserController {
 		@RequestBody @Valid RefreshRequest refreshRequest
 	) {
 		SignInResponse response = userService.refresh(refreshRequest);
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
+
+	@GetMapping("/detail")
+	public ResponseEntity<ApiResponse<UserDetailResponse>> getUserDetail(
+			@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		UserDetailResponse response = userService.getUserDetail(userDetails.getUsername());
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 }
