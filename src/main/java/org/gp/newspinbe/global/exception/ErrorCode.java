@@ -30,6 +30,8 @@ public enum ErrorCode {
 	USER_DUPLICATED("U001", "이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
 	EMAIL_DUPLICATION("U002", "이미 존재하는 이메일입니다.", HttpStatus.CONFLICT),
 	USER_NOT_FOUND("U003", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	VERIFICATION_CODE_EXPIRED("U004", "인증번호가 만료되었습니다. 다시 시도해주세요.", HttpStatus.BAD_REQUEST),
+	VERIFICATION_CODE_MISMATCH("U005", "인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 
 	// News
 	NEWS_NOT_FOUND("N001", "뉴스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
