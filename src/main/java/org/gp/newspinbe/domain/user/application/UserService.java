@@ -9,11 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.gp.newspinbe.domain.user.domain.User;
+import org.gp.newspinbe.domain.user.dto.request.PasswordResetRequest;
 import org.gp.newspinbe.domain.user.dto.request.RefreshRequest;
 import org.gp.newspinbe.domain.user.dto.request.SignInRequest;
 import org.gp.newspinbe.domain.user.dto.request.SignUpRequest;
 import org.gp.newspinbe.domain.user.dto.response.EmailVerificationResponse;
 import org.gp.newspinbe.domain.user.dto.response.SignInResponse;
+import org.gp.newspinbe.domain.user.dto.response.UserDetailResponse;
 import org.gp.newspinbe.domain.user.repository.UserRepository;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
@@ -29,8 +31,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 
 @Slf4j
 @Service
@@ -74,10 +74,10 @@ public class UserService {
 				return EmailVerificationResponse.builder().verified(true).message("인증 성공하였습니다.").build();
 			} else {
 				return EmailVerificationResponse.builder()
-					.verified(false)
-					.message(result)
-					.message("인증번호가 일치하지 않습니다")
-					.build();
+						.verified(false)
+						.message(result)
+						.message("인증번호가 일치하지 않습니다")
+						.build();
 			}
 		} else {
 			return EmailVerificationResponse.builder().verified(false).message("인증번호가 만료되었습니다. 다시 시도해주세요.").build();
@@ -97,7 +97,8 @@ public class UserService {
 
 	@Transactional
 	public SignInResponse signIn(SignInRequest signInRequest) {
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(signInRequest.getEmail(), signInRequest.getPassword());
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+				signInRequest.getEmail(), signInRequest.getPassword());
 
 		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -130,15 +131,62 @@ public class UserService {
 
 	private Authentication getAuthenticationForRefresh(String username) {
 		User user = userRepository.findByEmail(username)
-			.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
 		UserDetails userDetails = new CustomUserDetails(user);
 
 		return new UsernamePasswordAuthenticationToken(
-			userDetails,
-			"",
-			userDetails.getAuthorities()
-		);
+				userDetails,
+				"",
+				userDetails.getAuthorities());
+	}
+
+	@Transactional(readOnly = true)
+	public UserDetailResponse getUserDetail(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		return UserDetailResponse.from(user);
+	}
+
+	public void sendPasswordResetCode(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		String title = "NEWPIN 비밀번호 재설정 인증 메일";
+		String code = generateRandomCode();
+		String text = "비밀번호 재설정 인증번호: " + code;
+
+		String redisKey = "password_reset:" + email;
+		redisUtil.setDataExpire(redisKey, code, EXPIRATION);
+
+		try {
+			emailService.sendEmail(email, title, text);
+		} catch (Exception e) {
+			log.error("Error: {}", e);
+			throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+		}
+	}
+
+	@Transactional
+	public void resetPassword(PasswordResetRequest request) {
+		User user = userRepository.findByEmail(request.getEmail())
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		String redisKey = "password_reset:" + request.getEmail();
+		if (!redisUtil.existData(redisKey)) {
+			throw new CustomException(ErrorCode.VERIFICATION_CODE_EXPIRED);
+		}
+
+		String storedCode = redisUtil.getData(redisKey);
+		if (!storedCode.equals(request.getCode())) {
+			throw new CustomException(ErrorCode.VERIFICATION_CODE_MISMATCH);
+		}
+
+		String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+		user.updatePassword(encodedPassword);
+
+		redisUtil.deleteData(redisKey);
 	}
 
 	private String generateRandomCode() {

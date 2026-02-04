@@ -22,7 +22,6 @@ public class User extends BaseEntity {
 
 	private String password;
 
-
 	private User(String email, String password) {
 		this.email = email;
 		this.password = password;
@@ -30,5 +29,9 @@ public class User extends BaseEntity {
 
 	public static User create(String email, String password) {
 		return new User(email, password);
+	}
+
+	public void updatePassword(String newPassword) {
+		this.password = newPassword;
 	}
 }
