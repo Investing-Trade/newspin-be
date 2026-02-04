@@ -76,7 +76,7 @@ public class UserController {
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
-	@GetMapping("/detail")
+	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<UserDetailResponse>> getUserDetail(
 			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		UserDetailResponse response = userService.getUserDetail(userDetails.getUsername());
