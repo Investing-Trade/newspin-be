@@ -68,6 +68,13 @@ public class NewsArticle extends BaseEntity {
 		return new NewsArticle(title, content, articleDate, source);
 	}
 
+	public static NewsArticle createNewsWithSentiment(String title, String content, LocalDate articleDate,
+			String source, NewsSentiment sentiment) {
+		NewsArticle article = new NewsArticle(title, content, articleDate, source);
+		article.sentiment = sentiment;
+		return article;
+	}
+
 	// 감성 분석 결과 설정
 	public void updateSentiment(Double sentimentScore, String sentimentReason) {
 		this.sentimentScore = sentimentScore;

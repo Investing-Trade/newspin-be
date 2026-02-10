@@ -59,30 +59,28 @@ public class TradeService {
         return TradeResponse.from(trade, session.getCurrentCapital());
     }
 
-    // executeSell 내부 수정
     private Trade executeSell(SimulationSession session, Stock stock, Long quantity, BigDecimal price) {
         Portfolio portfolio = portfolioRepository.findBySessionAndStock(session, stock)
                 .orElseThrow(() -> new CustomException(ErrorCode.INSUFFICIENT_STOCK_QUANTITY));
 
-        // 보유 수량 확인
         if (portfolio.getQuantity() < quantity) {
             throw new CustomException(ErrorCode.INSUFFICIENT_STOCK_QUANTITY);
         }
 
         BigDecimal totalAmount = price.multiply(BigDecimal.valueOf(quantity));
 
-        // 1. 세션 잔고 증가
+        // 세션 잔고 증가
         session.increaseCapital(totalAmount);
 
-        // 2. 포트폴리오 업데이트 (감소)
+        // 포트폴리오 업데이트
         portfolio.removeStock(quantity);
         if (portfolio.getQuantity() == 0) {
             portfolioRepository.delete(portfolio); // 전량 매도 시 포트폴리오 삭제
         } else {
-            portfolioRepository.save(portfolio); // 수량 변경 저장
+            portfolioRepository.save(portfolio);
         }
 
-        // 3. 거래 기록 생성
+        // 거래 기록 생성
         Trade trade = Trade.createTrade(
                 session,
                 stock,
@@ -93,7 +91,6 @@ public class TradeService {
         return tradeRepository.save(trade);
     }
 
-    // executeBuy 에서 createPortfolio 호출 수정
     private Trade executeBuy(SimulationSession session, Stock stock, Long quantity, BigDecimal price) {
         BigDecimal totalAmount = price.multiply(BigDecimal.valueOf(quantity));
 
@@ -121,9 +118,7 @@ public class TradeService {
         return tradeRepository.save(trade);
     }
 
-    /**
-     * 거래 내역 조회
-     */
+    // 거래 내역 조회
     public java.util.List<TradeResponse> getTradeHistory(Long sessionId, Long userId) {
         SimulationSession session = getSession(sessionId, userId);
 
@@ -148,12 +143,14 @@ public class TradeService {
         return session;
     }
 
+    // 현재가 조회 (시뮬레이션 날짜 기준 종가)
     private BigDecimal getCurrentPrice(Stock stock, LocalDate simulationDate) {
         return stockPriceRepository.findByStockAndPriceDate(stock, simulationDate)
                 .map(StockPrice::getClosePrice)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TRADE));
     }
 
+    // 요청 가격 검증 (프론트에서 보낸 가격과 서버 가격 일치 여부) - 슬리피지 방지 및 데이터 무결성 체크
     private void validatePrice(BigDecimal requestPrice, BigDecimal currentPrice) {
         if (requestPrice.compareTo(currentPrice) != 0) {
             throw new CustomException(ErrorCode.INVALID_TRADE);

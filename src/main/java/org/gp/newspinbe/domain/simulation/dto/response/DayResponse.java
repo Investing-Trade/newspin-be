@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.gp.newspinbe.domain.event.dto.response.EventResponse;
 import org.gp.newspinbe.domain.news.dto.response.NewsResponse;
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SessionStatus;
@@ -25,9 +26,10 @@ public class DayResponse {
     private SessionStatus status; // 세션 상태
 
     private List<NewsResponse> todayNews; // 오늘 발생한 뉴스 리스트
+    private EventResponse event; // 오늘의 이벤트 (없을 수 있음)
 
     public static DayResponse from(SimulationSession session, AssetHistory todayHistory,
-            AssetHistory yesterdayHistory, List<NewsResponse> newsList) {
+            AssetHistory yesterdayHistory, List<NewsResponse> newsList, EventResponse event) {
 
         Double dailyProfitRate = 0.0;
         if (yesterdayHistory != null && yesterdayHistory.getTotalAsset().compareTo(BigDecimal.ZERO) > 0) {
@@ -46,6 +48,7 @@ public class DayResponse {
                 .dailyProfitRate(dailyProfitRate)
                 .status(session.getStatus())
                 .todayNews(newsList)
+                .event(event)
                 .build();
     }
 }

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.gp.newspinbe.domain.event.dto.response.EventResponse;
+import org.gp.newspinbe.domain.event.service.EventService;
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
 import org.gp.newspinbe.domain.news.dto.response.NewsResponse;
 import org.gp.newspinbe.domain.news.repository.NewsArticleRepository;
@@ -38,6 +40,7 @@ public class NextDayService {
     private final PortfolioRepository portfolioRepository;
     private final StockPriceRepository stockPriceRepository;
     private final NewsArticleRepository newsRepository;
+    private final EventService eventService;
 
     @Transactional
     public DayResponse proceedToNextDay(Long sessionId, Long userId) {
@@ -66,10 +69,13 @@ public class NextDayService {
         // 3. 자산 평가 및 기록
         AssetHistory todayHistory = calculateAndRecordAsset(session, nextDate);
 
-        // 4. 오늘의 뉴스 조회
+        // 4. 오늘의 뉴스 및 이벤트 조회
         List<NewsResponse> todayNews = getTodayNews(nextDate);
+        EventResponse event = eventService.findEventByDate(nextDate)
+                .map(EventResponse::from)
+                .orElse(null);
 
-        return DayResponse.from(session, todayHistory, yesterdayHistory, todayNews);
+        return DayResponse.from(session, todayHistory, yesterdayHistory, todayNews, event);
     }
 
     // 자산 평가 및 히스토리 기록
