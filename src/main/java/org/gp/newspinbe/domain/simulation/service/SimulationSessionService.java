@@ -2,6 +2,8 @@ package org.gp.newspinbe.domain.simulation.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
@@ -60,5 +62,15 @@ public class SimulationSessionService {
         if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
             throw new CustomException(ErrorCode.INVALID_DATE_RANGE);
         }
+    }
+
+    public List<SessionResponse> getMySessionList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return sessionRepository.findByUserOrderByCreatedAtDesc(user)
+                .stream()
+                .map(SessionResponse::from)
+                .collect(Collectors.toList());
     }
 }

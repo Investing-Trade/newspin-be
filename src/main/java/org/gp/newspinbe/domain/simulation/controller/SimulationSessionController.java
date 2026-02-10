@@ -1,5 +1,7 @@
 package org.gp.newspinbe.domain.simulation.controller;
 
+import java.util.List;
+
 import org.gp.newspinbe.domain.simulation.dto.request.SessionCreateRequest;
 import org.gp.newspinbe.domain.simulation.dto.response.SessionResponse;
 import org.gp.newspinbe.domain.simulation.service.SimulationSessionService;
@@ -8,6 +10,7 @@ import org.gp.newspinbe.global.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +34,15 @@ public class SimulationSessionController {
         SessionResponse response = sessionService.createSession(
                 userDetails.getUser().getUserId(),
                 request);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<SessionResponse>>> getMySessionList(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<SessionResponse> response = sessionService.getMySessionList(
+                userDetails.getUser().getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
