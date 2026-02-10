@@ -84,4 +84,16 @@ public class SimulationSessionService {
 
         return SessionResponse.from(session);
     }
+
+    @Transactional
+    public void deleteSession(Long sessionId, Long userId) {
+        SimulationSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SESSION_NOT_FOUND));
+
+        if (!session.getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        session.abandon();
+    }
 }

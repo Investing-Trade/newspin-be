@@ -10,6 +10,7 @@ import org.gp.newspinbe.global.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,5 +58,16 @@ public class SimulationSessionController {
                 userDetails.getUser().getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @DeleteMapping("/{sessionId}")
+    public ResponseEntity<ApiResponse<Void>> deleteSession(
+            @PathVariable Long sessionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        sessionService.deleteSession(
+                sessionId,
+                userDetails.getUser().getUserId());
+
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
