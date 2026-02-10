@@ -73,4 +73,15 @@ public class SimulationSessionService {
                 .map(SessionResponse::from)
                 .collect(Collectors.toList());
     }
+
+    public SessionResponse getSessionDetail(Long sessionId, Long userId) {
+        SimulationSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SESSION_NOT_FOUND));
+
+        if (!session.getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        return SessionResponse.from(session);
+    }
 }
