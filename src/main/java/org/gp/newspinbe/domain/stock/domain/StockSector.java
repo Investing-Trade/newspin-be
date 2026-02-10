@@ -1,8 +1,5 @@
 package org.gp.newspinbe.domain.stock.domain;
 
-/**
- * 주식 업종 분류 (6가지로 제한)
- */
 public enum StockSector {
     BIO("바이오"),
     IT_TECH("IT/테크"),

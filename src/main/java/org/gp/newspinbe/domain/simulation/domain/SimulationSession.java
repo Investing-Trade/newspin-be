@@ -22,10 +22,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * 모의 투자 시뮬레이션 세션
- * 사용자의 투자 시뮬레이션을 관리
- */
+//모의 투자 시뮬레이션 세션(사용자의 투자 시뮬레이션 관리)
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,20 +43,20 @@ public class SimulationSession extends BaseEntity {
     private BigDecimal initialCapital; // 초기 투자 금액
 
     @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal currentCapital; // 현재 보유 현금 (잔고)
+    private BigDecimal currentCapital; // 현재 보유 현금
 
     @Column(nullable = false)
-    private LocalDate startDate; // 시뮬레이션 시작 날짜 (과거)
+    private LocalDate startDate; // 시뮬레이션 시작 날짜
 
     @Column(nullable = false)
-    private LocalDate endDate; // 시뮬레이션 종료 날짜 (과거)
+    private LocalDate endDate; // 시뮬레이션 종료 날짜
 
     @Column(nullable = false)
     private LocalDate currentSimulationDate; // 현재 시뮬레이션이 진행 중인 날짜
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private SessionStatus status; // 세션 상태 (ACTIVE, COMPLETED, ABANDONED)
+    private SessionStatus status; // 세션 상태
 
     private SimulationSession(User user, BigDecimal initialCapital, LocalDate startDate, LocalDate endDate) {
         this.user = user;
@@ -78,9 +75,7 @@ public class SimulationSession extends BaseEntity {
         return new SimulationSession(user, initialCapital, startDate, endDate);
     }
 
-    /**
-     * 다음 날로 진행
-     */
+    // 다음 날로 진행
     public void advanceDay() {
         if (isCompleted()) {
             throw new IllegalStateException("이미 완료된 세션입니다.");
@@ -95,9 +90,7 @@ public class SimulationSession extends BaseEntity {
         }
     }
 
-    /**
-     * 거래 시 잔고 조정 (매수)
-     */
+    // 거래 시 잔고 조정 (매수)
     public void decreaseCapital(BigDecimal amount) {
         if (currentCapital.compareTo(amount) < 0) {
             throw new IllegalArgumentException("잔고가 부족합니다.");
@@ -105,51 +98,33 @@ public class SimulationSession extends BaseEntity {
         this.currentCapital = currentCapital.subtract(amount);
     }
 
-    /**
-     * 거래 시 잔고 조정 (매도)
-     */
+    // 거래 시 잔고 조정 (매도)
     public void increaseCapital(BigDecimal amount) {
         this.currentCapital = currentCapital.add(amount);
     }
 
-    /**
-     * 세션 완료
-     */
     public void complete() {
         this.status = SessionStatus.COMPLETED;
     }
 
-    /**
-     * 세션 중단
-     */
     public void abandon() {
         this.status = SessionStatus.ABANDONED;
     }
 
-    /**
-     * 세션 초기화 (다시 시작)
-     */
     public void reset() {
         this.currentCapital = initialCapital;
         this.currentSimulationDate = startDate;
         this.status = SessionStatus.ACTIVE;
     }
 
-    /**
-     * 세션이 진행 중인지 확인
-     */
     public boolean isActive() {
         return status == SessionStatus.ACTIVE;
     }
 
-    /**
-     * 세션이 완료되었는지 확인
-     */
     public boolean isCompleted() {
         return status == SessionStatus.COMPLETED;
     }
 
-    // Validation
     private static void validateDates(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("시작일은 종료일보다 이전이어야 합니다.");

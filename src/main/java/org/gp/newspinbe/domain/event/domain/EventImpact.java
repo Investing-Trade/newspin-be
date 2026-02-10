@@ -1,8 +1,5 @@
 package org.gp.newspinbe.domain.event.domain;
 
-/**
- * 이벤트의 전반적인 영향도
- */
 public enum EventImpact {
     POSITIVE("긍정"), // 전반적으로 시장에 호재
     NEGATIVE("부정"), // 전반적으로 시장에 악재

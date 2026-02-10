@@ -15,10 +15,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * 주식 종목 정보
- * market 필드 제거 (KOSPI/KOSDAQ 구분 불필요)
- */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,14 +28,14 @@ public class Stock extends BaseEntity {
     private Long stockId;
 
     @Column(name = "stock_code", nullable = false, unique = true, length = 10)
-    private String stockCode; // 종목 코드 (예: "005930")
+    private String stockCode; // 종목 코드
 
     @Column(name = "stock_name", nullable = false, length = 100)
-    private String stockName; // 종목명 (예: "삼성전자")
+    private String stockName; // 종목명
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private StockSector sector; // 업종 (6가지 중 1개)
+    private StockSector sector; // 업종
 
     @Column(columnDefinition = "TEXT")
     private String description; // 종목 설명 (선택)
