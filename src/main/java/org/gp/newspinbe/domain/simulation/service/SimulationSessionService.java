@@ -96,4 +96,18 @@ public class SimulationSessionService {
 
         session.abandon();
     }
+
+    @Transactional
+    public SessionResponse completeSession(Long sessionId, Long userId) {
+        SimulationSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SESSION_NOT_FOUND));
+
+        if (!session.getUser().getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        session.complete();
+
+        return SessionResponse.from(session);
+    }
 }
