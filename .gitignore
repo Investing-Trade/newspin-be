@@ -40,3 +40,7 @@ out/
 application-local.yml
 application-prod.yml
 /docs
+
+### Data Files (실제 데이터는 공개 금지) ###
+src/main/resources/data/
+src/main/java/org/gp/newspinbe/global/config/DataLoader.java

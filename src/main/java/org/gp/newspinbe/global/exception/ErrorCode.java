@@ -34,7 +34,16 @@ public enum ErrorCode {
 	VERIFICATION_CODE_MISMATCH("U005", "인증번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 
 	// News
-	NEWS_NOT_FOUND("N001", "뉴스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+	NEWS_NOT_FOUND("N001", "뉴스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+	// Simulation
+	SESSION_NOT_FOUND("S001", "세션을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	INVALID_DATE_RANGE("S002", "시작 날짜는 종료 날짜보다 이전이어야 합니다.", HttpStatus.BAD_REQUEST),
+	INSUFFICIENT_CAPITAL("S003", "잔고가 부족합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_TRADE("S004", "유효하지 않은 거래입니다.", HttpStatus.BAD_REQUEST),
+	STOCK_NOT_FOUND("S005", "종목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	INVALID_SESSION_STATUS("S006", "세션 상태가 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+	INSUFFICIENT_STOCK_QUANTITY("S007", "보유 수량이 부족합니다.", HttpStatus.BAD_REQUEST);
 
 	private final HttpStatus status;
 	private final String code;
