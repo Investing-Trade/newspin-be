@@ -2,6 +2,7 @@ package org.gp.newspinbe.domain.event.dto.response;
 
 import java.time.LocalDate;
 
+import org.gp.newspinbe.domain.event.domain.EventType;
 import org.gp.newspinbe.domain.event.domain.MarketEvent;
 
 import lombok.Builder;
@@ -13,7 +14,7 @@ public class EventResponse {
     private String eventName;
     private String description;
     private LocalDate eventDate;
-    private MarketEvent.EventType eventType;
+    private EventType eventType;
 
     public static EventResponse from(MarketEvent event) {
         return EventResponse.builder()

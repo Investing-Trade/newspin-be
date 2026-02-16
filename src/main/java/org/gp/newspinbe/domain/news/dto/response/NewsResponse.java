@@ -14,6 +14,9 @@ public class NewsResponse {
     private String title;
     private String content;
     private LocalDate articleDate;
+    private String source;
+    private org.gp.newspinbe.domain.news.domain.NewsSentiment sentiment;
+    private boolean isEvent;
 
     public static NewsResponse from(NewsArticle newsArticle) {
         return NewsResponse.builder()
@@ -21,6 +24,9 @@ public class NewsResponse {
                 .title(newsArticle.getTitle())
                 .content(newsArticle.getContent())
                 .articleDate(newsArticle.getArticleDate())
+                .source(newsArticle.getSource())
+                .sentiment(newsArticle.getSentiment())
+                .isEvent(false) // 일반 뉴스는 false
                 .build();
     }
 }

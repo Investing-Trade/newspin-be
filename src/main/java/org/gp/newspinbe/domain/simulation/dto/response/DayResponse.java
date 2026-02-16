@@ -25,11 +25,10 @@ public class DayResponse {
     private Double dailyProfitRate; // 전일 대비 수익률 (%)
     private SessionStatus status; // 세션 상태
 
-    private List<NewsResponse> todayNews; // 오늘 발생한 뉴스 리스트
-    private EventResponse event; // 오늘의 이벤트 (없을 수 있음)
+    private List<NewsResponse> todayNews; // 오늘 발생한 뉴스 리스트 (이벤트 포함)
 
     public static DayResponse from(SimulationSession session, AssetHistory todayHistory,
-            AssetHistory yesterdayHistory, List<NewsResponse> newsList, EventResponse event) {
+            AssetHistory yesterdayHistory, List<NewsResponse> newsList) {
 
         Double dailyProfitRate = 0.0;
         if (yesterdayHistory != null && yesterdayHistory.getTotalAsset().compareTo(BigDecimal.ZERO) > 0) {
@@ -48,7 +47,6 @@ public class DayResponse {
                 .dailyProfitRate(dailyProfitRate)
                 .status(session.getStatus())
                 .todayNews(newsList)
-                .event(event)
                 .build();
     }
 }

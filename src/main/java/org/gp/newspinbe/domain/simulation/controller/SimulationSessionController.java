@@ -56,6 +56,17 @@ public class SimulationSessionController {
                 return ResponseEntity.ok(ApiResponse.success(response));
         }
 
+        @GetMapping("/{sessionId}/daily-data")
+        public ResponseEntity<ApiResponse<DayResponse>> getDailyData(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                DayResponse response = nextDayService.getCurrentDayData(
+                                sessionId,
+                                userDetails.getUser().getUserId());
+
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
+
         @GetMapping("/{sessionId}/portfolio")
         public ResponseEntity<ApiResponse<org.gp.newspinbe.domain.simulation.dto.response.PortfolioOverviewResponse>> getPortfolioOverview(
                         @PathVariable Long sessionId,
