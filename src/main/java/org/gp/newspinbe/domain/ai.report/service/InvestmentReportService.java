@@ -1,4 +1,4 @@
-package org.gp.newspinbe.domain.report.service;
+package org.gp.newspinbe.domain.ai.report.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +14,7 @@ import org.gp.newspinbe.domain.report.dto.response.InvestmentReportResponse;
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
 import org.gp.newspinbe.domain.simulation.domain.Trade;
+import org.gp.newspinbe.domain.simulation.domain.TradeType;
 import org.gp.newspinbe.domain.simulation.repository.AssetHistoryRepository;
 import org.gp.newspinbe.domain.simulation.repository.SimulationSessionRepository;
 import org.gp.newspinbe.domain.simulation.repository.TradeRepository;
@@ -57,10 +58,8 @@ public class InvestmentReportService {
                 .findFirstBySessionOrderByRecordDateDesc(session)
                 .orElse(null);
 
-        long buyCount = tradeRepository.countBySessionAndTradeType(session,
-                org.gp.newspinbe.domain.simulation.domain.TradeType.BUY);
-        long sellCount = tradeRepository.countBySessionAndTradeType(session,
-                org.gp.newspinbe.domain.simulation.domain.TradeType.SELL);
+        long buyCount = tradeRepository.countBySessionAndTradeType(session, TradeType.BUY);
+        long sellCount = tradeRepository.countBySessionAndTradeType(session, TradeType.SELL);
 
         BigDecimal finalAsset = latestHistory != null
                 ? latestHistory.getTotalAsset()
