@@ -51,7 +51,7 @@ public class AssetHistory {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAsset; // 총 자산 (현금 + 주식)
 
-    @Column(nullable = false, precision = 7, scale = 4)
+    @Column(nullable = false)
     private Double profitRate; // 수익률 (%)
 
     private AssetHistory(SimulationSession session, LocalDate recordDate,

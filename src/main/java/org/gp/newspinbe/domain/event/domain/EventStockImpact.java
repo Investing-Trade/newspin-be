@@ -1,5 +1,6 @@
 package org.gp.newspinbe.domain.event.domain;
 
+import org.gp.newspinbe.domain.news.domain.NewsArticle;
 import org.gp.newspinbe.domain.stock.domain.Stock;
 
 import jakarta.persistence.Column;
@@ -18,16 +19,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * 이벤트가 특정 종목에 미치는 영향도
+ * 이벤트 뉴스가 특정 종목에 미치는 영향도
  * 중요: 사용자에게는 절대 노출하지 않음 (AI 보고서 생성 시에만 사용하는 정답 데이터)
+ * NewsArticle(eventType != null)과 연결됨
  */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "event_stock_impact", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "event_id", "stock_id" })
+        @UniqueConstraint(columnNames = { "news_id", "stock_id" })
 }, indexes = {
-        @Index(name = "idx_impact_event", columnList = "event_id")
+        @Index(name = "idx_impact_news", columnList = "news_id")
 })
 public class EventStockImpact {
     @Id
@@ -35,31 +37,29 @@ public class EventStockImpact {
     private Long impactId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
-    private MarketEvent event;
+    @JoinColumn(name = "news_id", nullable = false)
+    private NewsArticle newsArticle; // 이벤트 뉴스와 연결
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
 
-    // 실제 영향도
     @Column(nullable = false)
-    private Double impactRate;
+    private Double impactRate; // 실제 영향도 (%)
 
-    // 영향도 이유 설명
     @Column(columnDefinition = "TEXT")
-    private String impactReason;
+    private String impactReason; // 영향도 이유 설명
 
-    private EventStockImpact(MarketEvent event, Stock stock, Double impactRate, String impactReason) {
-        this.event = event;
+    private EventStockImpact(NewsArticle newsArticle, Stock stock, Double impactRate, String impactReason) {
+        this.newsArticle = newsArticle;
         this.stock = stock;
         this.impactRate = impactRate;
         this.impactReason = impactReason;
     }
 
-    public static EventStockImpact createImpact(MarketEvent event, Stock stock,
+    public static EventStockImpact createImpact(NewsArticle newsArticle, Stock stock,
             Double impactRate, String impactReason) {
-        return new EventStockImpact(event, stock, impactRate, impactReason);
+        return new EventStockImpact(newsArticle, stock, impactRate, impactReason);
     }
 
     public void updateImpact(Double impactRate, String impactReason) {

@@ -90,6 +90,14 @@ public class SimulationSession extends BaseEntity {
         }
     }
 
+    // 특정 날짜로 업데이트 (주말 건너뛰기 등)
+    public void updateCurrentSimulationDate(LocalDate nextDate) {
+        if (nextDate.isBefore(this.currentSimulationDate)) {
+            throw new IllegalArgumentException("과거 날짜로 돌아갈 수 없습니다.");
+        }
+        this.currentSimulationDate = nextDate;
+    }
+
     // 거래 시 잔고 조정 (매수)
     public void decreaseCapital(BigDecimal amount) {
         if (currentCapital.compareTo(amount) < 0) {

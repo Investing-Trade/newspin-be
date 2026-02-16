@@ -49,7 +49,7 @@ public class Trade extends BaseEntity {
     private TradeType tradeType;
 
     @Column(nullable = false)
-    private Integer quantity; // 거래 수량
+    private Long quantity; // 거래 수량
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal price; // 거래 가격 (주당)
@@ -61,7 +61,7 @@ public class Trade extends BaseEntity {
     private LocalDate tradeDate; // 거래 날짜
 
     private Trade(SimulationSession session, Stock stock, TradeType tradeType,
-            Integer quantity, BigDecimal price, LocalDate tradeDate) {
+            Long quantity, BigDecimal price, LocalDate tradeDate) {
         this.session = session;
         this.stock = stock;
         this.tradeType = tradeType;
@@ -72,7 +72,7 @@ public class Trade extends BaseEntity {
     }
 
     public static Trade createTrade(SimulationSession session, Stock stock, TradeType tradeType,
-            Integer quantity, BigDecimal price, LocalDate tradeDate) {
+            Long quantity, BigDecimal price, LocalDate tradeDate) {
         validateQuantity(quantity);
         validatePrice(price);
         return new Trade(session, stock, tradeType, quantity, price, tradeDate);
@@ -86,7 +86,7 @@ public class Trade extends BaseEntity {
         return tradeType == TradeType.SELL;
     }
 
-    private static void validateQuantity(Integer quantity) {
+    private static void validateQuantity(Long quantity) {
         if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("수량은 0보다 커야 합니다.");
         }

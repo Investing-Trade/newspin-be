@@ -3,7 +3,9 @@ package org.gp.newspinbe.domain.simulation.controller;
 import java.util.List;
 
 import org.gp.newspinbe.domain.simulation.dto.request.SessionCreateRequest;
+import org.gp.newspinbe.domain.simulation.dto.response.DayResponse;
 import org.gp.newspinbe.domain.simulation.dto.response.SessionResponse;
+import org.gp.newspinbe.domain.simulation.service.NextDayService;
 import org.gp.newspinbe.domain.simulation.service.SimulationSessionService;
 import org.gp.newspinbe.global.common.ApiResponse;
 import org.gp.newspinbe.global.security.CustomUserDetails;
@@ -28,58 +30,94 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SimulationSessionController {
 
-    private final SimulationSessionService sessionService;
+        private final SimulationSessionService sessionService;
+        private final NextDayService nextDayService;
+        private final org.gp.newspinbe.domain.simulation.service.PortfolioService portfolioService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<SessionResponse>> createSession(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Validated @RequestBody SessionCreateRequest request) {
-        SessionResponse response = sessionService.createSession(
-                userDetails.getUser().getUserId(),
-                request);
+        @PostMapping
+        public ResponseEntity<ApiResponse<SessionResponse>> createSession(
+                        @AuthenticationPrincipal CustomUserDetails userDetails,
+                        @Validated @RequestBody SessionCreateRequest request) {
+                SessionResponse response = sessionService.createSession(
+                                userDetails.getUser().getUserId(),
+                                request);
 
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<SessionResponse>>> getMySessionList(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<SessionResponse> response = sessionService.getMySessionList(
-                userDetails.getUser().getUserId());
+        @PostMapping("/{sessionId}/next-day")
+        public ResponseEntity<ApiResponse<DayResponse>> proceedToNextDay(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                DayResponse response = nextDayService.proceedToNextDay(
+                                sessionId,
+                                userDetails.getUser().getUserId());
 
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
 
-    @GetMapping("/{sessionId}")
-    public ResponseEntity<ApiResponse<SessionResponse>> getSessionDetail(
-            @PathVariable Long sessionId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        SessionResponse response = sessionService.getSessionDetail(
-                sessionId,
-                userDetails.getUser().getUserId());
+        @GetMapping("/{sessionId}/daily-data")
+        public ResponseEntity<ApiResponse<DayResponse>> getDailyData(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                DayResponse response = nextDayService.getCurrentDayData(
+                                sessionId,
+                                userDetails.getUser().getUserId());
 
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
 
-    @DeleteMapping("/{sessionId}")
-    public ResponseEntity<ApiResponse<Void>> deleteSession(
-            @PathVariable Long sessionId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        sessionService.deleteSession(
-                sessionId,
-                userDetails.getUser().getUserId());
+        @GetMapping("/{sessionId}/portfolio")
+        public ResponseEntity<ApiResponse<org.gp.newspinbe.domain.simulation.dto.response.PortfolioOverviewResponse>> getPortfolioOverview(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                org.gp.newspinbe.domain.simulation.dto.response.PortfolioOverviewResponse response = portfolioService
+                                .getPortfolioOverview(
+                                                sessionId,
+                                                userDetails.getUser().getUserId());
 
-        return ResponseEntity.ok(ApiResponse.success());
-    }
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
 
-    @PutMapping("/{sessionId}/complete")
-    public ResponseEntity<ApiResponse<SessionResponse>> completeSession(
-            @PathVariable Long sessionId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        SessionResponse response = sessionService.completeSession(
-                sessionId,
-                userDetails.getUser().getUserId());
+        @GetMapping
+        public ResponseEntity<ApiResponse<List<SessionResponse>>> getMySessionList(
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                List<SessionResponse> response = sessionService.getMySessionList(
+                                userDetails.getUser().getUserId());
 
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
+
+        @GetMapping("/{sessionId}")
+        public ResponseEntity<ApiResponse<SessionResponse>> getSessionDetail(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                SessionResponse response = sessionService.getSessionDetail(
+                                sessionId,
+                                userDetails.getUser().getUserId());
+
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
+
+        @DeleteMapping("/{sessionId}")
+        public ResponseEntity<ApiResponse<Void>> deleteSession(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                sessionService.deleteSession(
+                                sessionId,
+                                userDetails.getUser().getUserId());
+
+                return ResponseEntity.ok(ApiResponse.success());
+        }
+
+        @PutMapping("/{sessionId}/complete")
+        public ResponseEntity<ApiResponse<SessionResponse>> completeSession(
+                        @PathVariable Long sessionId,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                SessionResponse response = sessionService.completeSession(
+                                sessionId,
+                                userDetails.getUser().getUserId());
+
+                return ResponseEntity.ok(ApiResponse.success(response));
+        }
 }

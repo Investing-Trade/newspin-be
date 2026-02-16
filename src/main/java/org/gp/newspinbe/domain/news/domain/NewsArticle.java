@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gp.newspinbe.domain.event.domain.EventType;
 import org.gp.newspinbe.domain.stock.domain.Stock;
 import org.gp.newspinbe.global.common.BaseEntity;
 
@@ -39,18 +40,23 @@ public class NewsArticle extends BaseEntity {
 	private LocalDate articleDate;
 
 	@Column(length = 100)
-	private String source; // 뉴스 출처 (예: "한국경제", "매일경제")
+	private String source;
 
 	@Enumerated(EnumType.STRING)
 	@Column(length = 20)
-	private NewsSentiment sentiment; // 뉴스 감성 (호재/악재/중립)
+	private NewsSentiment sentiment;
+
+	// 이벤트 타입 (null이면 일반 뉴스, 값이 있으면 이벤트 뉴스)
+	@Enumerated(EnumType.STRING)
+	@Column(length = 30)
+	private EventType eventType;
 
 	// AI 감성 분석 필드
 	@Column
-	private Double sentimentScore; // 감성 점수
+	private Double sentimentScore;
 
 	@Column(columnDefinition = "TEXT")
-	private String sentimentReason; // 감성 분석 이유
+	private String sentimentReason;
 
 	// 관련 종목 (N:M 관계)
 	@ManyToMany
@@ -64,8 +70,31 @@ public class NewsArticle extends BaseEntity {
 		this.source = source;
 	}
 
+	// 일반 뉴스 생성
 	public static NewsArticle createNewsArticle(String title, String content, LocalDate articleDate, String source) {
 		return new NewsArticle(title, content, articleDate, source);
+	}
+
+	// 감성 포함 일반 뉴스 생성
+	public static NewsArticle createNewsWithSentiment(String title, String content, LocalDate articleDate,
+			String source, NewsSentiment sentiment) {
+		NewsArticle article = new NewsArticle(title, content, articleDate, source);
+		article.sentiment = sentiment;
+		return article;
+	}
+
+	// 이벤트 뉴스 생성 (이벤트 타입 포함)
+	public static NewsArticle createEventNews(String title, String content, LocalDate articleDate,
+			String source, NewsSentiment sentiment, EventType eventType) {
+		NewsArticle article = new NewsArticle(title, content, articleDate, source);
+		article.sentiment = sentiment;
+		article.eventType = eventType;
+		return article;
+	}
+
+	// 이벤트 뉴스인지 확인
+	public boolean isEvent() {
+		return this.eventType != null;
 	}
 
 	// 감성 분석 결과 설정

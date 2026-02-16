@@ -44,12 +44,12 @@ public class Portfolio extends BaseEntity {
     private Stock stock;
 
     @Column(nullable = false)
-    private Integer quantity; // 보유 수량
+    private Long quantity; // 보유 수량
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal avgPurchasePrice; // 평균 매입 가격
 
-    private Portfolio(SimulationSession session, Stock stock, Integer quantity, BigDecimal avgPurchasePrice) {
+    private Portfolio(SimulationSession session, Stock stock, Long quantity, BigDecimal avgPurchasePrice) {
         this.session = session;
         this.stock = stock;
         this.quantity = quantity;
@@ -57,24 +57,35 @@ public class Portfolio extends BaseEntity {
     }
 
     public static Portfolio createPortfolio(SimulationSession session, Stock stock,
-            Integer quantity, BigDecimal purchasePrice) {
+            Long quantity, BigDecimal purchasePrice) {
         validateQuantity(quantity);
         return new Portfolio(session, stock, quantity, purchasePrice);
     }
 
+    // 빈 포트폴리오 생성 (첫 매수 시 사용)
+    public static Portfolio createPortfolio(SimulationSession session, Stock stock) {
+        return new Portfolio(session, stock, 0L, BigDecimal.ZERO);
+    }
+
     // 매수 시 평균 단가 재계산
-    public void addStock(Integer additionalQuantity, BigDecimal purchasePrice) {
+    public void addStock(Long additionalQuantity, BigDecimal purchasePrice) {
         BigDecimal currentTotal = avgPurchasePrice.multiply(BigDecimal.valueOf(quantity));
         BigDecimal additionalTotal = purchasePrice.multiply(BigDecimal.valueOf(additionalQuantity));
-        Integer newQuantity = quantity + additionalQuantity;
+        Long newQuantity = quantity + additionalQuantity;
 
-        this.avgPurchasePrice = currentTotal.add(additionalTotal)
-                .divide(BigDecimal.valueOf(newQuantity), 2, RoundingMode.HALF_UP);
+        // 평균 단가 계산 (총 매입금액 / 총 수량)
+        if (newQuantity > 0) {
+            this.avgPurchasePrice = currentTotal.add(additionalTotal)
+                    .divide(BigDecimal.valueOf(newQuantity), 2, RoundingMode.HALF_UP);
+        } else {
+            this.avgPurchasePrice = BigDecimal.ZERO;
+        }
+
         this.quantity = newQuantity;
     }
 
     // 매도 시 수량 감소
-    public void removeStock(Integer soldQuantity) {
+    public void removeStock(Long soldQuantity) {
         if (soldQuantity > quantity) {
             throw new IllegalArgumentException("보유 수량보다 많이 매도할 수 없습니다.");
         }
@@ -109,7 +120,7 @@ public class Portfolio extends BaseEntity {
         return quantity == 0;
     }
 
-    private static void validateQuantity(Integer quantity) {
+    private static void validateQuantity(Long quantity) {
         if (quantity == null || quantity < 0) {
             throw new IllegalArgumentException("수량은 0 이상이어야 합니다.");
         }
