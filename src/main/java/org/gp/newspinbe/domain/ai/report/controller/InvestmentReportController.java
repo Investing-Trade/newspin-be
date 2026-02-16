@@ -1,7 +1,7 @@
-package org.gp.newspinbe.domain.report.controller;
+package org.gp.newspinbe.domain.ai.report.controller;
 
-import org.gp.newspinbe.domain.report.dto.response.InvestmentReportResponse;
-import org.gp.newspinbe.domain.report.service.InvestmentReportService;
+import org.gp.newspinbe.domain.ai.report.dto.response.InvestmentReportResponse;
+import org.gp.newspinbe.domain.ai.report.service.InvestmentReportService;
 import org.gp.newspinbe.global.common.ApiResponse;
 import org.gp.newspinbe.global.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;

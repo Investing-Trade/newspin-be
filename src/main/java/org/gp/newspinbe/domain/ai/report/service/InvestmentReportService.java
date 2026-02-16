@@ -10,7 +10,7 @@ import org.gp.newspinbe.domain.event.domain.EventStockImpact;
 import org.gp.newspinbe.domain.event.repository.EventStockImpactRepository;
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
 import org.gp.newspinbe.domain.news.repository.NewsArticleRepository;
-import org.gp.newspinbe.domain.report.dto.response.InvestmentReportResponse;
+import org.gp.newspinbe.domain.ai.report.dto.response.InvestmentReportResponse;
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
 import org.gp.newspinbe.domain.simulation.domain.Trade;
