@@ -1,4 +1,4 @@
-package org.gp.newspinbe.domain.report.dto.response;
+package org.gp.newspinbe.domain.ai.report.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
