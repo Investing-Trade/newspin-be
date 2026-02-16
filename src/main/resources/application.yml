@@ -47,6 +47,10 @@ logging:
 server:
   url: ${SERVER_URL}
 
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: gemini-2.0-flash
+
 ---
 spring:
   config:
