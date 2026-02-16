@@ -5,13 +5,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.gp.newspinbe.domain.event.dto.response.EventResponse;
-import org.gp.newspinbe.domain.event.service.EventService;
 import org.gp.newspinbe.domain.news.dto.response.NewsResponse;
 import org.gp.newspinbe.domain.news.repository.NewsArticleRepository;
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.Portfolio;
-import org.gp.newspinbe.domain.simulation.domain.SessionStatus;
 import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
 import org.gp.newspinbe.domain.simulation.dto.response.DayResponse;
 import org.gp.newspinbe.domain.simulation.repository.AssetHistoryRepository;
@@ -39,7 +36,6 @@ public class NextDayService {
     private final PortfolioRepository portfolioRepository;
     private final StockPriceRepository stockPriceRepository;
     private final NewsArticleRepository newsRepository;
-    private final EventService eventService;
 
     // 현재 날짜의 데이터 조회 (저장 없음)
     public DayResponse getCurrentDayData(Long sessionId, Long userId) {
@@ -63,8 +59,8 @@ public class NextDayService {
                 .findFirstBySessionAndRecordDateLessThanOrderByRecordDateDesc(session, currentDate)
                 .orElse(null);
 
-        // 3. 뉴스 및 이벤트 조회
-        List<NewsResponse> todayNews = getNewsWithEvents(currentDate);
+        // 3. 뉴스 조회 (이벤트 뉴스도 자동 포함)
+        List<NewsResponse> todayNews = getTodayNews(currentDate);
 
         return DayResponse.from(session, todayHistory, yesterdayHistory, todayNews);
     }
@@ -79,7 +75,7 @@ public class NextDayService {
                         session.getCurrentSimulationDate().plusDays(1))
                 .orElse(null);
 
-        // 1. 날짜 이동
+        // 1. 날짜 이동 (주말 건너뛰기)
         LocalDate nextDate = session.getCurrentSimulationDate().plusDays(1);
         while (isWeekend(nextDate)) {
             nextDate = nextDate.plusDays(1);
@@ -95,8 +91,8 @@ public class NextDayService {
         // 3. 자산 평가 및 기록 (DB 저장)
         AssetHistory todayHistory = calculateAndRecordAsset(session, nextDate);
 
-        // 4. 뉴스 및 이벤트 조회
-        List<NewsResponse> todayNews = getNewsWithEvents(nextDate);
+        // 4. 뉴스 조회 (이벤트 뉴스도 자동 포함)
+        List<NewsResponse> todayNews = getTodayNews(nextDate);
 
         return DayResponse.from(session, todayHistory, yesterdayHistory, todayNews);
     }
@@ -105,7 +101,6 @@ public class NextDayService {
     private AssetHistory calculateAndRecordAsset(SimulationSession session, LocalDate date) {
         BigDecimal totalStockValue = calculateTotalStockValue(session, date);
 
-        // AssetHistory 생성 및 저장
         AssetHistory history = AssetHistory.createHistory(
                 session,
                 date,
@@ -114,17 +109,16 @@ public class NextDayService {
         return assetHistoryRepository.save(history);
     }
 
-    // 총 주식 평가액 계산 (공통)
+    // 총 주식 평가액 계산
     private BigDecimal calculateTotalStockValue(SimulationSession session, LocalDate date) {
         List<Portfolio> portfolios = portfolioRepository.findBySessionWithStock(session);
         BigDecimal totalStockValue = BigDecimal.ZERO;
 
         for (Portfolio portfolio : portfolios) {
             Stock stock = portfolio.getStock();
-            // 해당 날짜의 종가 조회 (데이터 없으면 0원 처리 or 에러)
             BigDecimal closePrice = stockPriceRepository.findByStockAndPriceDate(stock, date)
                     .map(StockPrice::getClosePrice)
-                    .orElse(BigDecimal.ZERO); // 데이터 없으면 0으로 처리 (유연하게)
+                    .orElse(BigDecimal.ZERO);
 
             totalStockValue = totalStockValue.add(
                     closePrice.multiply(BigDecimal.valueOf(portfolio.getQuantity())));
@@ -132,26 +126,11 @@ public class NextDayService {
         return totalStockValue;
     }
 
-    // 뉴스 및 이벤트 조회 (공통)
-    private List<NewsResponse> getNewsWithEvents(LocalDate date) {
-        List<NewsResponse> newsList = new java.util.ArrayList<>(
-                newsRepository.findByArticleDate(date).stream()
-                        .map(NewsResponse::from)
-                        .collect(Collectors.toList()));
-
-        eventService.findEventByDate(date).ifPresent(marketEvent -> {
-            NewsResponse eventNews = NewsResponse.builder()
-                    .newsId(null)
-                    .title("[속보] " + marketEvent.getEventName())
-                    .content(marketEvent.getDescription())
-                    .articleDate(marketEvent.getEventDate())
-                    .source("MARKET_EVENT")
-                    .isEvent(true)
-                    .build();
-            newsList.add(0, eventNews);
-        });
-
-        return newsList;
+    // 오늘의 뉴스 조회 (이벤트 뉴스도 NewsArticle이므로 자동 포함)
+    private List<NewsResponse> getTodayNews(LocalDate date) {
+        return newsRepository.findByArticleDate(date).stream()
+                .map(NewsResponse::from)
+                .collect(Collectors.toList());
     }
 
     private SimulationSession getSession(Long sessionId, Long userId) {

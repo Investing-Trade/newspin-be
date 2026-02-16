@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.gp.newspinbe.domain.event.dto.response.EventResponse;
 import org.gp.newspinbe.domain.news.dto.response.NewsResponse;
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SessionStatus;

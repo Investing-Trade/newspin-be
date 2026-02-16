@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.gp.newspinbe.domain.simulation.domain.Portfolio;
-import org.gp.newspinbe.domain.stock.domain.Stock;
 
 import lombok.Builder;
 import lombok.Getter;
