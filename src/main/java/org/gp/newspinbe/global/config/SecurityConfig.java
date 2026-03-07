@@ -39,8 +39,9 @@ public class SecurityConfig {
 		"/user/sign-in",
 		"/user/refresh",
 		"/user/email/**",
+		"/user/password/send-reset-code",
 		"/swagger-ui/**",
-		"/v3/api-docs/**"
+		"/v3/api-docs/**",
 	};
 
 	@Bean
