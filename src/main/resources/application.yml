@@ -18,7 +18,7 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}nn
+      host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
       port: 6379
 
@@ -50,6 +50,9 @@ server:
 gemini:
   api-key: ${GEMINI_API_KEY}
   model: gemini-2.0-flash
+
+ai-service:
+  url: ${AI_SERVICE_URL}
 
 ---
 spring:
