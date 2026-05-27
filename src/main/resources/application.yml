@@ -18,7 +18,7 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}nn
+      host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
       port: 6379
 
@@ -52,7 +52,7 @@ gemini:
   model: gemini-2.0-flash
 
 ai-service:
-  url: ${AI_SERVICE_URL:http://localhost:8000}
+  url: ${AI_SERVICE_URL}
 
 ---
 spring:
