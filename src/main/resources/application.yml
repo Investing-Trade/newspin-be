@@ -51,6 +51,9 @@ gemini:
   api-key: ${GEMINI_API_KEY}
   model: gemini-2.0-flash
 
+ai-service:
+  url: ${AI_SERVICE_URL}
+
 ---
 spring:
   config:
