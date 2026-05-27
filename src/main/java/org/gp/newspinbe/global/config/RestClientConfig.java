@@ -22,6 +22,17 @@ public class RestClientConfig {
                 .build();
     }
 
+    @Value("${ai-service.url:http://localhost:8000}")
+    private String aiServiceUrl;
+
+    @Bean
+    public RestClient aiAnalysisRestClient() {
+        return RestClient.builder()
+                .baseUrl(aiServiceUrl)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
+
     public String getGeminiApiKey() {
         return geminiApiKey;
     }
