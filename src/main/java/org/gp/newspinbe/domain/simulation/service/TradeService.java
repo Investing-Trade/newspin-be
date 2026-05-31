@@ -47,8 +47,8 @@ public class TradeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.STOCK_NOT_FOUND));
 
         BigDecimal currentPrice = getCurrentPrice(stock, session.getCurrentSimulationDate());
-        validatePrice(request.getPrice(), currentPrice);
-
+        // ✅ 모의투자이므로 가격 검증 제거 - 프론트 price와 DB price 불일치 문제 해결
+        // validatePrice(request.getPrice(), currentPrice);
         Trade trade;
         if (request.getTradeType() == TradeType.BUY) {
             trade = executeBuy(session, stock, request.getQuantity(), currentPrice);
