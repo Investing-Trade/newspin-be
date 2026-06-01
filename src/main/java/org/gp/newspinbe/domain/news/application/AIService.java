@@ -1,5 +1,9 @@
 package org.gp.newspinbe.domain.news.application;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.UUID;
 
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
@@ -13,9 +17,12 @@ import org.gp.newspinbe.domain.stock.domain.Stock;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
 import org.gp.newspinbe.global.service.GeminiService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,19 +37,46 @@ public class AIService {
     private final NewsService newsService;
     private final RestClient aiAnalysisRestClient;
     private final GeminiService geminiService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${ai-service.url}")
+    private String aiServiceUrl;
 
     @Transactional
     public AIAnalysisResponse analyzeUserJudgment(Long userId, Long newsId, AIAnalysisRequest aiAnalysisRequest) {
+
+        // 임시 테스트
+        try {
+            String testJson = "{\"request_id\":\"test\",\"article\":{\"article_id\":1,\"title\":\"test\",\"content\":\"테스트\"},\"options\":{\"max_snippets\":12,\"include_weak_snippets\":false,\"include_raw_model_output\":false}}";
+            HttpClient testClient = HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .build();
+            HttpRequest testRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(aiServiceUrl + "/api/v1/analyze"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(testJson))
+                    .build();
+            HttpResponse<String> testResponse = testClient.send(testRequest, HttpResponse.BodyHandlers.ofString());
+            log.info("테스트 응답 상태코드: {}", testResponse.statusCode());
+            log.info("테스트 응답 body: {}", testResponse.body());
+        } catch (Exception e) {
+            log.error("테스트 실패: {}", e.getMessage());
+        }
+
         NewsArticle newsArticle = newsArticleRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NEWS_NOT_FOUND));
 
-        // 1. 외부 감정 분석 AI API 호출을 위한 요청 페이로드 생성
+        String content = newsArticle.getContent();
+        if (content != null && content.length() > 2000) {
+            content = content.substring(0, 2000);
+        }
+
         ExternalAIRequest requestPayload = ExternalAIRequest.builder()
                 .request_id(UUID.randomUUID().toString())
                 .article(ExternalAIRequest.ArticleInfo.builder()
                         .article_id(newsArticle.getNewsId())
                         .title(newsArticle.getTitle())
-                        .content(newsArticle.getContent())
+                        .content(content)
                         .articleDate(newsArticle.getArticleDate().toString())
                         .source(newsArticle.getSource())
                         .relatedStocks(newsArticle.getRelatedStocks().stream()
@@ -56,14 +90,33 @@ public class AIService {
                         .build())
                 .build();
 
-        // 2. 외부 감정 분석 AI API 호출
         ExternalAIResponse externalResponse;
         try {
-            externalResponse = aiAnalysisRestClient.post()
-                    .uri("/api/v1/analyze")
-                    .body(requestPayload)
-                    .retrieve()
-                    .body(ExternalAIResponse.class);
+            String requestJson = objectMapper.writeValueAsString(requestPayload);
+            log.info("aiServiceUrl: {}", aiServiceUrl);
+            log.info("requestJson length: {}", requestJson.length());
+            log.info("AI 서버로 전송할 requestJson: {}", requestJson);
+
+            HttpClient httpClient = HttpClient.newBuilder()
+                    .connectTimeout(java.time.Duration.ofSeconds(10))
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .build();
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(aiServiceUrl + "/api/v1/analyze"))
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .timeout(java.time.Duration.ofSeconds(30))
+                    .POST(HttpRequest.BodyPublishers.ofString(requestJson, java.nio.charset.StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> httpResponse = httpClient.send(
+                    httpRequest, HttpResponse.BodyHandlers.ofString());
+
+            log.info("AI 서버 응답 상태코드: {}", httpResponse.statusCode());
+            log.info("AI 서버 응답 body: {}", httpResponse.body());
+
+            externalResponse = objectMapper.readValue(httpResponse.body(), ExternalAIResponse.class);
         } catch (Exception e) {
             log.error("외부 감정 분석 AI API 호출 실패: {}", e.getMessage(), e);
             throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
@@ -74,11 +127,9 @@ public class AIService {
             throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
         }
 
-        // 3. 외부 AI의 분석 결과에서 감성 분석 매핑
         NewsSentiment aiSentiment = mapToNewsSentiment(externalResponse.getSummary().getOverall_sentiment());
         boolean isCorrect = aiAnalysisRequest.getSentiment() == aiSentiment;
 
-        // 4. Gemini 프롬프트 작성 및 피드백 생성
         String prompt = String.format(
                 "당신은 학생들의 투자 판단을 평가하고 가르치는 전문 금융 AI 튜터입니다.\n\n" +
                 "이하의 뉴스 기사와 이에 대한 인공지능 분석 결과, 그리고 학생의 판단 내용 및 이유를 바탕으로 한국어로 친근하고 전문적인 피드백을 작성해 주세요.\n\n" +
@@ -111,7 +162,6 @@ public class AIService {
 
         String feedback = geminiService.generateContent(prompt);
 
-        // 5. 뉴스 학습 진행 상태 표시
         newsService.markNewsAsLearned(userId, newsId);
 
         return AIAnalysisResponse.builder()
