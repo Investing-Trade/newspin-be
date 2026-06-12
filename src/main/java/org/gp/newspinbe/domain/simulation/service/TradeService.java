@@ -145,9 +145,10 @@ public class TradeService {
 
     // 현재가 조회 (시뮬레이션 날짜 기준 종가)
     private BigDecimal getCurrentPrice(Stock stock, LocalDate simulationDate) {
-        return stockPriceRepository.findByStockAndPriceDate(stock, simulationDate)
-                .map(StockPrice::getClosePrice)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TRADE));
+    return stockPriceRepository.findByStockAndPriceDate(stock, simulationDate)
+            .or(() -> stockPriceRepository.findFirstByStockAndPriceDateBeforeOrderByPriceDateDesc(stock, simulationDate))
+            .map(StockPrice::getClosePrice)
+            .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TRADE));
     }
 
     // 요청 가격 검증 (프론트에서 보낸 가격과 서버 가격 일치 여부) - 슬리피지 방지 및 데이터 무결성 체크

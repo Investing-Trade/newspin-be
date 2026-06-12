@@ -16,6 +16,8 @@ public interface StockPriceRepository extends JpaRepository<StockPrice, Long> {
 
     Optional<StockPrice> findByStockAndPriceDate(Stock stock, LocalDate priceDate);
 
+    Optional<StockPrice> findFirstByStockAndPriceDateBeforeOrderByPriceDateDesc(Stock stock, LocalDate priceDate);
+    
     List<StockPrice> findByStockAndPriceDateBetween(Stock stock, LocalDate startDate, LocalDate endDate);
 
     List<StockPrice> findTop5ByStockAndPriceDateLessThanOrderByPriceDateDesc(Stock stock, LocalDate priceDate);
