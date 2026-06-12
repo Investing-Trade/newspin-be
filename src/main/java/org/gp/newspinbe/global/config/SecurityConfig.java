@@ -40,6 +40,7 @@ public class SecurityConfig {
 		"/user/refresh",
 		"/user/email/**",
 		"/swagger-ui/**",
+		"/user/password/**", // 비밀번호 찾기 send-reset-code api 연결 문제 수정
 		"/v3/api-docs/**"
 	};
 
