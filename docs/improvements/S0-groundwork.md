@@ -67,11 +67,14 @@
   TCP 데몬 노출) 로 우회. **CI(ubuntu, unix 소켓)에서는 정상 동작** — 통합 테스트 1차 검증처는 CI.
   스키마/시드 정확성은 `bootRun --spring.profiles.active=dev` 로도 검증됨(위 로그).
 
-### 로컬 미해결 (CI 에서 검증)
+### 통합 테스트 상태
 
-- 통합 테스트 3건(`NewspinBeApplicationTests`, `SeedDataIntegrationTest`, `StockServiceLookaheadCharacterizationTest`)은
-  이 개발 머신의 Docker Desktop named-pipe 이슈로 로컬 실행 불가. 코드는 컴파일되고 CI(GitHub Actions)에서 실행됨.
-  로컬에서 돌리려면 위 TCP 우회 필요.
+- CI(GitHub Actions, ubuntu)에서 통합 테스트 3건(`NewspinBeApplicationTests`,
+  `SeedDataIntegrationTest`, `StockServiceLookaheadCharacterizationTest`) **green 확인** —
+  Testcontainers MySQL + Flyway + `ddl-auto: validate` + 시드 적재까지 실제 실행됨.
+- 로컬(이 개발 머신)은 Docker Desktop named-pipe 이슈로 실행 불가 → 위 TCP 우회 필요.
+- CI 부트스트랩 중 발견/수정한 것: gradlew 실행 비트(PR #11), Redis placeholder(I-18, PR #12),
+  SeedRunner 프로필 게이트(`@Profile("!prod")`, PR #12).
 
 ## ⑤ 검증
 
