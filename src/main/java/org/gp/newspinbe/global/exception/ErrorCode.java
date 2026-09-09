@@ -25,6 +25,7 @@ public enum ErrorCode {
 	// Internal Server Error
 	INTERNAL_SERVER_ERROR("C999", "서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 	EXTERNAL_SERVICE_ERROR("C901", "외부 서비스 연동 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+	AI_SERVICE_UNAVAILABLE("C902", "AI 분석 서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.", HttpStatus.SERVICE_UNAVAILABLE),
 
 	// User
 	USER_DUPLICATED("U001", "이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
