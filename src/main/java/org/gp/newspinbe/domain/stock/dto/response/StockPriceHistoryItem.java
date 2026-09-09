@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class StockPriceHistoryItem {
+public class StockPriceHistoryItem implements java.io.Serializable {
     private final LocalDate date;
     private final BigDecimal openPrice;
     private final BigDecimal closePrice;

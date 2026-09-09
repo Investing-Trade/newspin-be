@@ -20,6 +20,8 @@ spring:
         generate_statistics: true
   flyway:
     enabled: true
+  cache:
+    type: simple   # 테스트는 Redis 컨테이너 없이 인메모리 캐시로 캐싱 동작만 검증
   data:
     redis:
       host: localhost

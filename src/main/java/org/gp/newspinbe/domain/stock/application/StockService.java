@@ -13,8 +13,10 @@ import org.gp.newspinbe.domain.stock.dto.response.StockPriceHistoryItem;
 import org.gp.newspinbe.domain.stock.dto.response.StockPriceHistoryResponse;
 import org.gp.newspinbe.domain.stock.repository.StockPriceRepository;
 import org.gp.newspinbe.domain.stock.repository.StockRepository;
+import org.gp.newspinbe.global.config.CacheConfig;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,8 @@ public class StockService {
      * 기준일({@code asOfDate}) 시점의 주가 히스토리. 기준일 <b>이후</b> 시세는 반환하지 않는다 (C-5, S-1).
      * 학습 시뮬레이션에서 유저가 판단 시점 이후의 정답(주가 흐름)을 미리 볼 수 없도록 하는 것이 목적.
      */
+    // 과거 확정 시세라 결과가 불변 → (종목, 기준일) 키로 캐시 (I-3)
+    @Cacheable(cacheNames = CacheConfig.PRICE_HISTORY, key = "#stockCode + ':' + #asOfDate")
     @Transactional(readOnly = true)
     public StockPriceHistoryResponse getStockPriceHistoryUpTo(String stockCode, LocalDate asOfDate) {
         Stock stock = stockRepository.findByStockCode(stockCode)
@@ -38,6 +42,7 @@ public class StockService {
         return getHistoryResponse(stock, asOfDate);
     }
 
+    @Cacheable(cacheNames = CacheConfig.PRICE_HISTORY_ALL, key = "#asOfDate.toString()")
     @Transactional(readOnly = true)
     public List<StockPriceHistoryResponse> getAllStocksPriceHistoryUpTo(LocalDate asOfDate) {
         return stockRepository.findAll().stream()
