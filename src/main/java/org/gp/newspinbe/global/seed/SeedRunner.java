@@ -48,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-@Profile({"local", "dev"})
+@Profile("!prod") // 운영 제외. 실제 적재 여부는 newspin.seed.enabled 로 제어
 @ConditionalOnProperty(prefix = "newspin.seed", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(SeedProperties.class)
 @RequiredArgsConstructor
