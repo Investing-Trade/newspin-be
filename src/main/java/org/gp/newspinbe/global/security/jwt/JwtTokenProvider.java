@@ -93,7 +93,9 @@ public class JwtTokenProvider {
 
 	private String generateRefreshToken(String username, Date expireDate) {
 		return Jwts.builder()
+				.setId(java.util.UUID.randomUUID().toString()) // jti — 같은 ms 에 발급돼도 토큰이 유일하도록
 				.setSubject(username)
+				.setIssuedAt(new Date())
 				.setExpiration(expireDate)
 				.signWith(key, SignatureAlgorithm.HS256)
 				.compact();
