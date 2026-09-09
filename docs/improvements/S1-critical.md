@@ -4,8 +4,8 @@
 - **이슈 ID**: C-1, C-5, C-3, C-4 (+ S-1)
 - **브랜치**: `feat/stage-1-critical`
 - **PR**: (링크)
-- **상태**: 🚧 진행 중
-- **기간**: 2026-09-09 ~
+- **상태**: ✅ 구현 완료 (PR 리뷰 대기)
+- **기간**: 2026-09-09
 
 신뢰도를 훼손하는 결함 4건. 각 항목 착수 전 특성화 테스트를 깔고 시작한다.
 
@@ -57,14 +57,69 @@ FE `develop` 브랜치의 차트(`fetchPriceHistory`)가 실제로 이 미래 �
 
 ## 3. 모의투자 가격 검증 재설계 (C-3)
 
-(작성 예정)
+### 문제
+`TradeService.executeTrade` 에서 `validatePrice(request.getPrice(), currentPrice)` 호출부가
+주석 처리됨 ("모의투자이므로 가격 검증 제거"). 클라이언트가 어떤 가격을 보내도 그대로 통과.
+체결은 서버 시세로 하지만, 클라이언트가 본 가격과 서버 시세가 어긋나도 감지·거절하지 못함.
+
+### 원인
+원래 `validatePrice` 가 `requestPrice.compareTo(currentPrice) != 0` (완전 일치) 라 타이밍·날짜
+차이로 항상 실패 → 팀이 검증 자체를 껐음.
+
+### 조치
+- `validatePrice(clientPrice, serverPrice)`: 서버 시세 대비 **±1% 허용 오차** 검증.
+  안이면 통과, 벗어나면 `PRICE_MISMATCH`(S008, 409) 로 거절.
+- 체결가는 **항상 서버 시세** (클라이언트 값 미신뢰).
+- 정상 흐름에서 FE 는 서버와 같은 일봉 종가를 `price` 로 보내므로 오탐 없음.
+  스테일/조작된 값(하드코딩 fallback 등)은 걸러짐.
+
+### 검증
+- `TradeServicePriceValidationTest`: 일치 / +0.5%(허용) / +10%(거절) 3케이스.
+- 로컬 E2E: 정가 57,200 → 체결, +10% → `S008` 거절.
 
 ## 4. GeminiService 응답 파싱 방어 + 재시도 (C-4)
 
-(작성 예정)
+### 문제
+- 응답을 `(Map)(List)...(String)` 캐스팅 체인으로 파싱. Gemini 가 안전 필터로 콘텐츠를 막으면
+  `content`/`parts` 가 없어 NPE (broad `catch(Exception)` 가 삼켜 `"...오류: null"` 반환).
+- 재시도·타임아웃 없음. `geminiRestClient` 에 타임아웃 미설정(무한 대기 가능).
+- 429/5xx 일시 오류도 그냥 실패.
+
+### 조치
+- `geminiRestClient`: connect 5s / read 20s 타임아웃.
+- `parseText` — null 안전 네비게이션 + `finishReason`/`promptFeedback.blockReason` 검사.
+  - 차단(SAFETY/RECITATION/…) → `GeminiBlockedException` → 재시도 없이 `FALLBACK_BLOCKED`.
+  - 형식 이상 → `GeminiUnavailableException` → `FALLBACK_ERROR`.
+- 일시 오류(`ResourceAccessException`, 429, 5xx)만 최대 3회, backoff 0/0.5/1.5s 재시도.
+- `InvestmentReportService`: `## ` 마커가 없으면(=fallback 메시지) 그 메시지를 섹션에 그대로 노출
+  (구조화 출력 전면 개편은 스테이지 3).
+
+### 검증
+- `GeminiResponseParseTest` (순수 단위 테스트, 5케이스): 정상/parts 빈 SAFETY/content 없음/
+  candidates 없음·null/promptFeedback 차단.
 
 ---
 
+## ⑤ 요약
+
+| 항목 | Before | After |
+| --- | --- | --- |
+| 요청당 AI 서버 호출 | 2회 (더미 1 + 실제 1) | 1회 |
+| `/stocks/price-range` 미래 시세 | 이후 5영업일 노출 | 기준일 이하만 |
+| 시세 히스토리 쿼리 | 종목당 3~4회 | 종목당 1~2회 |
+| 거래 가격 검증 | 없음 (임의 가격 통과) | 서버 시세 ±1%, 체결은 서버가 |
+| Gemini 안전필터 차단 | NPE → `"...오류: null"` | `FALLBACK_BLOCKED` |
+| Gemini 일시 오류 | 즉시 실패 | 3회 재시도(backoff) |
+| Gemini 타임아웃 | 없음 | connect 5s / read 20s |
+
 ## ⑥ 회고 / 자소서·면접 문장 초안
 
-(스테이지 종료 시 취합)
+- **클라이언트를 믿지 않는다**: 거래 가격을 클라이언트 값 그대로 받던 것을, 서버 시세를 기준으로
+  허용 오차만 검증하고 체결은 서버가로 강제하도록 재설계. "완전 일치 검증이 실패해서 검증을 껐다"는
+  선택을, 슬리피지 허용 범위를 둔 검증으로 되살림.
+- **정답을 미리 보여주지 않는다**: 학습 시뮬레이션에서 판단 시점 이후 주가를 API 가 그대로 주고 있었음.
+  "노출 가능 데이터의 상한 = 판단 시점" 을 조회 레이어에서 강제.
+- **외부 LLM 은 실패한다**: 안전 필터 차단·응답 지연·일시 오류를 각각 다르게 처리(즉시 fallback vs
+  재시도). 캐스팅 파싱 → 방어적 파싱 + `finishReason` 기반 분기.
+- 예상 질문: "가격 검증을 왜 1%로 뒀나?" → "정상 흐름에서 FE 와 서버는 같은 일봉 종가를 쓰므로 거의
+  0%. 1% 는 라운딩·엣지 케이스 여유이고, 스테일/하드코딩 값(10~50% 오차)은 확실히 걸러진다."
