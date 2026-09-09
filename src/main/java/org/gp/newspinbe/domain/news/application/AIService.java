@@ -1,9 +1,5 @@
 package org.gp.newspinbe.domain.news.application;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.UUID;
 
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
@@ -17,43 +13,57 @@ import org.gp.newspinbe.domain.stock.domain.Stock;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
 import org.gp.newspinbe.global.service.GeminiService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 뉴스 감정 판단 학습 플로우.
+ *
+ * <p>트랜잭션을 열지 않는다 (R-1). 뉴스 로딩은 리포지토리가 자체 트랜잭션으로 처리하고,
+ * 외부 호출(newspin-ai, Gemini)은 트랜잭션 밖에서 실행해 DB 커넥션을 점유하지 않는다.
+ * 학습 완료 기록만 {@link NewsService#markNewsAsLearned} 의 트랜잭션으로 커밋한다.
+ */
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class AIService {
 
+    private static final int MAX_CONTENT_LENGTH = 2000;
+
     private final NewsArticleRepository newsArticleRepository;
     private final NewsService newsService;
-    private final RestClient aiAnalysisRestClient;
+    private final AiAnalysisClient aiAnalysisClient;
     private final GeminiService geminiService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${ai-service.url}")
-    private String aiServiceUrl;
-
-    @Transactional
     public AIAnalysisResponse analyzeUserJudgment(Long userId, Long newsId, AIAnalysisRequest aiAnalysisRequest) {
-
-        NewsArticle newsArticle = newsArticleRepository.findById(newsId)
+        NewsArticle newsArticle = newsArticleRepository.findWithRelatedStocksByNewsId(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NEWS_NOT_FOUND));
 
-        String content = newsArticle.getContent();
-        if (content != null && content.length() > 2000) {
-            content = content.substring(0, 2000);
-        }
+        ExternalAIResponse externalResponse = aiAnalysisClient.analyze(toExternalRequest(newsArticle));
 
-        ExternalAIRequest requestPayload = ExternalAIRequest.builder()
+        ExternalAIResponse.SummaryInfo summary = externalResponse.getSummary();
+        NewsSentiment aiSentiment = mapToNewsSentiment(summary.getOverall_sentiment());
+        boolean isCorrect = aiAnalysisRequest.getSentiment() == aiSentiment;
+
+        String feedback = geminiService.generateContent(buildPrompt(newsArticle, summary, aiAnalysisRequest, isCorrect));
+
+        newsService.markNewsAsLearned(userId, newsId);
+
+        return AIAnalysisResponse.builder()
+                .aiSentiment(aiSentiment)
+                .aiFeedback(feedback)
+                .isCorrect(isCorrect)
+                .build();
+    }
+
+    private ExternalAIRequest toExternalRequest(NewsArticle newsArticle) {
+        String content = newsArticle.getContent();
+        if (content != null && content.length() > MAX_CONTENT_LENGTH) {
+            content = content.substring(0, MAX_CONTENT_LENGTH);
+        }
+        return ExternalAIRequest.builder()
                 .request_id(UUID.randomUUID().toString())
                 .article(ExternalAIRequest.ArticleInfo.builder()
                         .article_id(newsArticle.getNewsId())
@@ -71,48 +81,11 @@ public class AIService {
                         .include_raw_model_output(false)
                         .build())
                 .build();
+    }
 
-        ExternalAIResponse externalResponse;
-        try {
-            String requestJson = objectMapper.writeValueAsString(requestPayload);
-            log.info("aiServiceUrl: {}", aiServiceUrl);
-            log.info("requestJson length: {}", requestJson.length());
-            log.info("AI 서버로 전송할 requestJson: {}", requestJson);
-
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .connectTimeout(java.time.Duration.ofSeconds(10))
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .build();
-
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(aiServiceUrl + "/api/v1/analyze"))
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .timeout(java.time.Duration.ofSeconds(30))
-                    .POST(HttpRequest.BodyPublishers.ofString(requestJson, java.nio.charset.StandardCharsets.UTF_8))
-                    .build();
-
-            HttpResponse<String> httpResponse = httpClient.send(
-                    httpRequest, HttpResponse.BodyHandlers.ofString());
-
-            log.info("AI 서버 응답 상태코드: {}", httpResponse.statusCode());
-            log.info("AI 서버 응답 body: {}", httpResponse.body());
-
-            externalResponse = objectMapper.readValue(httpResponse.body(), ExternalAIResponse.class);
-        } catch (Exception e) {
-            log.error("외부 감정 분석 AI API 호출 실패: {}", e.getMessage(), e);
-            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
-        }
-
-        if (externalResponse == null || externalResponse.getSummary() == null) {
-            log.error("외부 감정 분석 AI 응답 또는 요약 정보가 null입니다.");
-            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
-        }
-
-        NewsSentiment aiSentiment = mapToNewsSentiment(externalResponse.getSummary().getOverall_sentiment());
-        boolean isCorrect = aiAnalysisRequest.getSentiment() == aiSentiment;
-
-        String prompt = String.format(
+    private String buildPrompt(NewsArticle newsArticle, ExternalAIResponse.SummaryInfo summary,
+            AIAnalysisRequest request, boolean isCorrect) {
+        return String.format(
                 "당신은 학생들의 투자 판단을 평가하고 가르치는 전문 금융 AI 튜터입니다.\n\n" +
                 "이하의 뉴스 기사와 이에 대한 인공지능 분석 결과, 그리고 학생의 판단 내용 및 이유를 바탕으로 한국어로 친근하고 전문적인 피드백을 작성해 주세요.\n\n" +
                 "1. 뉴스 기사\n" +
@@ -130,27 +103,15 @@ public class AIService {
                 "학생의 답변이 인공지능 분석과 비교했을 때 %s 판단인지 평가해 주시고, 왜 그렇게 분석하는 것이 옳은지(혹은 틀렸는지)를 뉴스 본문의 핵심 맥락과 AI 분석 결과를 인용하며 학습 관점에서 친절하게 설명해 주세요. 마지막으로 이 뉴스에서 기억해야 할 금융 지식이나 교훈을 1~2문장으로 덧붙여 주세요.",
                 newsArticle.getTitle(),
                 newsArticle.getContent(),
-                externalResponse.getSummary().getOverall_sentiment(),
-                externalResponse.getSummary().getPositive_score(),
-                externalResponse.getSummary().getNegative_score(),
-                externalResponse.getSummary().getNeutral_score(),
-                externalResponse.getSummary().getPositive_keywords() != null ? String.join(", ", externalResponse.getSummary().getPositive_keywords()) : "없음",
-                externalResponse.getSummary().getNegative_keywords() != null ? String.join(", ", externalResponse.getSummary().getNegative_keywords()) : "없음",
-                externalResponse.getSummary().getDominant_categories() != null ? String.join(", ", externalResponse.getSummary().getDominant_categories()) : "없음",
-                aiAnalysisRequest.getSentiment() == NewsSentiment.POSITIVE ? "호재 (POSITIVE)" : (aiAnalysisRequest.getSentiment() == NewsSentiment.NEGATIVE ? "악재 (NEGATIVE)" : "중립 (NEUTRAL)"),
-                aiAnalysisRequest.getReason(),
-                isCorrect ? "올바른" : "틀린"
-        );
-
-        String feedback = geminiService.generateContent(prompt);
-
-        newsService.markNewsAsLearned(userId, newsId);
-
-        return AIAnalysisResponse.builder()
-                .aiSentiment(aiSentiment)
-                .aiFeedback(feedback)
-                .isCorrect(isCorrect)
-                .build();
+                summary.getOverall_sentiment(),
+                summary.getPositive_score(), summary.getNegative_score(), summary.getNeutral_score(),
+                summary.getPositive_keywords() != null ? String.join(", ", summary.getPositive_keywords()) : "없음",
+                summary.getNegative_keywords() != null ? String.join(", ", summary.getNegative_keywords()) : "없음",
+                summary.getDominant_categories() != null ? String.join(", ", summary.getDominant_categories()) : "없음",
+                request.getSentiment() == NewsSentiment.POSITIVE ? "호재 (POSITIVE)"
+                        : (request.getSentiment() == NewsSentiment.NEGATIVE ? "악재 (NEGATIVE)" : "중립 (NEUTRAL)"),
+                request.getReason(),
+                isCorrect ? "올바른" : "틀린");
     }
 
     private NewsSentiment mapToNewsSentiment(String sentimentStr) {

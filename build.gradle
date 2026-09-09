@@ -52,6 +52,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.flywaydb:flyway-mysql'
 
+    // 회복탄력성 — 외부 AI 연동 (S2, R-2). core 만 사용해 프로그래밍 방식으로 데코레이트
+    // (SB4 에 대한 resilience4j-spring-boot 스타터 호환 리스크 회피)
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-retry:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-micrometer:2.3.0'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'

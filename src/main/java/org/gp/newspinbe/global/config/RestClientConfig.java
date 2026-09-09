@@ -34,12 +34,14 @@ public class RestClientConfig {
 
     @Bean
     public RestClient aiAnalysisRestClient() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+        factory.setReadTimeout(Duration.ofSeconds(15));
         return RestClient.builder()
-               .baseUrl(aiServiceUrl)
+                .baseUrl(aiServiceUrl)
                 .defaultHeader("Content-Type", "application/json")
-                // 추가: AI 서버가 JSON 응답을 반환하도록 Accept 헤더 추가
-                // 이 헤더가 없으면 body가 null로 전송될 수 있음
                 .defaultHeader("Accept", "application/json")
+                .requestFactory(factory)
                 .build();
     }
 
