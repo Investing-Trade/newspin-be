@@ -48,7 +48,7 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 9 | 세션 거래 동시성 (잔고 lost update) | R-4 | 위험 | ✅ | [S2-B](improvements/S2-concurrency.md) |
 | 10 | 시세 결측 조용한 0 처리 → 관측 가능화 | R-5 | 위험 | ✅ | [S2-C](improvements/S2-config.md) |
 | 11 | 프로필/보안 설정 분리 (CORS·ddl-auto·로깅) | R-6, I-8 | 위험 | ✅ | [S2-C](improvements/S2-config.md) |
-| 12 | 뉴스 랜덤 조회 쿼리 최적화 | I-1 | 개선 | ⬜ | - |
+| 12 | 뉴스 랜덤 조회 쿼리 최적화 | I-1 | 개선 | ✅ | [S3](improvements/S3-news-random-query.md) |
 | 13 | StockPrice 반복 조회 배치화 | I-2 | 개선 | ⬜ | - |
 | 14 | Redis 캐시 계층 실제 도입 | I-3 | 개선 | ⬜ | - |
 | 15 | HTTP 클라이언트 통일 (RestClient 빈) | I-5 | 개선 | ✅ | [S2-A](improvements/S2-resilience.md) (AIService 의 raw HttpClient 제거) |

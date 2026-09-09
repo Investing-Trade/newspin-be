@@ -1,6 +1,5 @@
 package org.gp.newspinbe.domain.news.application;
 
-import java.util.List;
 import java.util.Random;
 
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
@@ -12,6 +11,7 @@ import org.gp.newspinbe.domain.user.domain.User;
 import org.gp.newspinbe.domain.user.repository.UserRepository;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,30 +26,32 @@ public class NewsService {
     private final UserRepository userRepository;
     private final Random random = new Random();
 
-    @Transactional(readOnly = true)
+    /**
+     * 미학습 뉴스 1건 랜덤 반환. 모두 학습했으면 진행률을 리셋하고 전체에서 뽑는다.
+     *
+     * <p>기존: {@code findAll()} 로 전체 뉴스(TEXT 본문 포함)를 메모리에 올린 뒤 인메모리 필터링.
+     * 개선: count 쿼리 + offset 1건 조회 (I-1).
+     */
+    @Transactional
     public NewsResponse getRandomUnlearnedNews(Long userId) {
-        List<Long> learnedNewsIds = userNewsProgressRepository.findLearnedNewsIdsByUserId(userId);
-        List<NewsArticle> allNews = newsArticleRepository.findAll();
+        long unlearned = newsArticleRepository.countUnlearnedByUser(userId);
 
-        if (allNews.isEmpty()) {
-            throw new CustomException(ErrorCode.NEWS_NOT_FOUND);
-        }
-
-        List<NewsArticle> unlearnedNews = allNews.stream()
-                .filter(news -> !learnedNewsIds.contains(news.getNewsId()))
-                .toList();
-
-        // 모든 뉴스를 학습한 경우, 진행률 초기화
-        if (unlearnedNews.isEmpty()) {
+        if (unlearned == 0) {
+            long total = newsArticleRepository.count();
+            if (total == 0) {
+                throw new CustomException(ErrorCode.NEWS_NOT_FOUND);
+            }
             resetUserProgress(userId);
-            unlearnedNews = allNews;
+            unlearned = total;
         }
 
-        // 랜덤으로 1개 선택
-        int randomIndex = random.nextInt(unlearnedNews.size());
-        NewsArticle selectedNews = unlearnedNews.get(randomIndex);
+        int offset = random.nextInt((int) unlearned);
+        NewsArticle selected = newsArticleRepository
+                .findUnlearnedByUser(userId, PageRequest.of(offset, 1))
+                .stream().findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.NEWS_NOT_FOUND));
 
-        return NewsResponse.from(selectedNews);
+        return NewsResponse.from(selected);
     }
 
     @Transactional
