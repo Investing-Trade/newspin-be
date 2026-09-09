@@ -1,6 +1,6 @@
 # NewsPin 백엔드 고도화 기록
 
-`newspin-be`(Spring Boot / Java)를 자소서·면접에서 설명 가능한 수준으로 끌어올리는 개선 작업의 전체 기록입니다.
+`newspin-be`(Spring Boot / Java)의 안정성·성능·유지보수성을 단계적으로 개선한 작업 기록입니다.
 AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 필요 시 FE만 최소 수정합니다.
 
 ## 문서 지도

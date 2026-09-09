@@ -52,10 +52,9 @@
 - `/actuator/health` 200, `/actuator/prometheus` 200, `/actuator/metrics` **403** (인증 필요)
 - `StockPriceResolverTest` (CI): 거래일 exact / 주말 fallback / 데이터 이전 empty·0
 
-## ⑥ 회고 / 자소서·면접 문장 초안
+## ⑥ 회고
 
-- **조용한 실패를 시끄럽게**: 결측 시세를 0으로 처리하면 총자산이 조용히 틀어진다. 폴백 정책을 한 곳에
-  모으고(`StockPriceResolver`), exact/fallback/missing 을 메트릭으로 노출해 "지금 시세 데이터에 구멍이
-  있는지"를 대시보드에서 볼 수 있게 했다.
-- **개발 설정이 운영에 새지 않게**: CORS·관측 엔드포인트 노출·스키마 관리 정책을 프로필로 분리하고,
-  운영 템플릿(`application-prod.yml.example`)으로 "운영에서 절대 하면 안 되는 것"을 문서화.
+- 결측 시세를 0으로 처리하면 총자산이 조용히 틀어진다. 폴백 정책을 `StockPriceResolver` 한 곳에 모으고
+  exact/fallback/missing 을 메트릭으로 노출 → 시세 데이터 구멍을 대시보드에서 확인 가능.
+- CORS·관측 엔드포인트 노출·스키마 관리 정책을 프로필로 분리하고, `application-prod.yml.example` 로
+  운영 설정 기준을 명문화.
