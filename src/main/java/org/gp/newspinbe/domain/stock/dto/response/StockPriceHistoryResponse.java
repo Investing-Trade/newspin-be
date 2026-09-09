@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class StockPriceHistoryResponse {
+public class StockPriceHistoryResponse implements java.io.Serializable {
     private final Long stockId;
     private final String stockCode;
     private final String stockName;
