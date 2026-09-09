@@ -50,7 +50,7 @@
 | POST | `/simulation/sessions/{id}/trades` | 매수/매도 |
 | GET | `/simulation/sessions/{id}/trades` | 거래 내역 |
 | GET | `/simulation/sessions/{id}/report` | 투자 리포트 (Gemini 1회 호출) |
-| GET | `/stocks/{code}/price-range`, `/stocks/price-range` | 주가 시계열 |
+| GET | `/stocks/{code}/price-range`, `/stocks/price-range` | 주가 시계열 — ⚠️ `date` 기준 **이후 5영업일**까지 반환 (lookahead, C-5) |
 
 ## 핵심 플로우
 

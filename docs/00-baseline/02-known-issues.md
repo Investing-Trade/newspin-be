@@ -11,6 +11,7 @@
 | C-2 | `.gitignore` + `DataLoader.java` | 시드 데이터 적재 코드/데이터가 git 제외. clone 후 실행 불가, "적재 완료" 보고와 불일치 | 재현 불가, 성능 측정 불가, 리뷰어 실행 불가 |
 | C-3 | `TradeService.executeTrade` | 가격 검증(`validatePrice`) 호출부 주석 처리. 클라이언트가 보낸 임의 가격으로 체결 가능 | 데이터 무결성·신뢰성. "서버가 최종 검증 권한을 갖지 않음" |
 | C-4 | `GeminiService.generateContent` / `InvestmentReportService.extractSection` | Gemini 응답을 방어 없이 캐스팅 체인으로 파싱. `finishReason=SAFETY` 등으로 `parts`가 비면 NPE. 리포트는 마커 문자열 검색 파싱이라 형식이 조금만 달라도 실패 문자열 노출 | 외부 요인으로 요청 전체 실패 |
+| C-5 | `StockService.getStockPriceHistoryAroundDate` / `getAllStocksPriceHistoryAroundDate`, `GET /stocks/{code}/price-range`, `GET /stocks/price-range` | **미래 정보 유출(lookahead)**. 클라이언트가 보낸 `date` 기준으로 **이후 5영업일치 주가**(종가·변동률 포함)를 그대로 반환. 세션의 `currentSimulationDate`와 대조하지 않음. 유저가 "오늘 뉴스"를 보고 매수를 고민하는 시점에 이 API로 그 종목이 며칠 뒤 오를지/내릴지를 미리 볼 수 있음 | 학습 서비스의 핵심 전제("정답을 미리 보여주지 않는다")가 API 계약 레벨에서 깨짐. 프론트가 실수/의도로 노출하면 서비스 신뢰도 붕괴 |
 
 ## 위험
 
@@ -44,6 +45,14 @@
 | I-15 | `Dockerfile` vs `build.gradle` | JDK 21 vs 25 불일치 | 통일 |
 | I-16 | `GlobalExceptionHandler` | validation 에러가 필드별 메시지 없이 뭉뚱그림, `ErrorCode.message` 비-final | 응답 표준화 |
 | I-17 | jjwt 0.11.5 | deprecated API (`parserBuilder` 등) | 0.12.x 마이그레이션 |
+
+## 구조적 이슈 (설계 레벨)
+
+| ID | 문제 | 방향 | 범위 |
+| --- | --- | --- | --- |
+| S-1 | **lookahead 방어선이 API에 없음.** C-5는 증상. 근본 원인은 "시뮬레이션에서 유저에게 노출 가능한 데이터의 상한선 = `currentSimulationDate`"라는 규칙이 어디에도 강제되지 않는다는 것. 시세 조회 3개 경로(`StockService`, `NextDayService`, `PortfolioService`, `TradeService`)가 제각기 날짜를 다룸 | 세션 컨텍스트에서 "현재일 이후 데이터는 반환 금지"를 한 곳에서 강제(가드/전용 리포지토리 메서드 `...AndPriceDateLessThanEqual`). 미래 구간 API는 세션에 종속시키고 상한 클램프 | 스테이지 1 (C-5) + 스테이지 2 일부 |
+| S-2 | **학습-평가 사일로.** `EventStockImpact`(정답지)가 대형 이벤트 3건에만 존재 → 2,544건 뉴스 중 대부분의 일상 판단은 최종 리포트에서 채점 안 됨. "뉴스 판단 퀴즈"(개별 뉴스 정오)와 "투자 리포트"(이벤트 3건 대응)가 데이터상 연결 안 됨 | 리포트 입력에 `UserNewsProgress` + 개별 뉴스 감성 정오 이력을 포함해 "판단 정확도" 지표를 추가. 정답지는 이벤트 임팩트에만 의존하지 않도록 | 스테이지 3 후보 (항목 신설) |
+| S-3 | **정답지-시세 정합성 수작업.** `impactRate`(내러티브 정답)와 `StockPrice`(실제 시세)가 독립 적재 → 실제 주가가 정답과 안 맞으면 시세를 수동 보정해야 앞뒤가 맞음. 이벤트 늘릴 때마다 확장 안 됨 | 시드 파이프라인에서 이벤트 임팩트로부터 해당 구간 시세를 파생 생성(또는 검증)하는 규칙 도입. **데이터 파이프라인 영역이라 이번 BE 개선 범위 밖** — 면접 구두 설명 + 시드 스크립트 리팩토링 시 개선 여지 기록 | 범위 밖 (기록만) |
 
 ## 참고: 건드리지 않는 것
 
