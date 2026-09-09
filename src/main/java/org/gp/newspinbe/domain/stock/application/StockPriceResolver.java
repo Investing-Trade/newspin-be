@@ -2,6 +2,10 @@ package org.gp.newspinbe.domain.stock.application;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.gp.newspinbe.domain.stock.domain.Stock;
@@ -56,7 +60,52 @@ public class StockPriceResolver {
         return resolveCloseAsOf(stock, asOf).orElse(BigDecimal.ZERO);
     }
 
+    /**
+     * 여러 종목의 평가용 종가를 한 번에 (I-2). 종목 수와 무관하게 쿼리 1~2회.
+     * 반환 맵은 요청한 모든 stockId 를 키로 가진다 (결측이면 0).
+     */
+    public Map<Long, BigDecimal> closesForValuation(Collection<Stock> stocks, LocalDate asOf) {
+        if (stocks == null || stocks.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> ids = stocks.stream().map(Stock::getStockId).distinct().toList();
+        Map<Long, BigDecimal> byStockId = new HashMap<>();
+
+        for (StockPrice p : stockPriceRepository.findByStockIdsAndPriceDate(ids, asOf)) {
+            byStockId.put(p.getStock().getStockId(), p.getClosePrice());
+        }
+        countN("exact", byStockId.size());
+
+        List<Long> missing = ids.stream().filter(id -> !byStockId.containsKey(id)).toList();
+        if (!missing.isEmpty()) {
+            int before = byStockId.size();
+            for (StockPrice p : stockPriceRepository.findLatestBeforeByStockIds(missing, asOf)) {
+                byStockId.putIfAbsent(p.getStock().getStockId(), p.getClosePrice());
+            }
+            countN("fallback", byStockId.size() - before);
+        }
+
+        int stillMissing = 0;
+        for (Long id : ids) {
+            if (!byStockId.containsKey(id)) {
+                byStockId.put(id, BigDecimal.ZERO);
+                stillMissing++;
+            }
+        }
+        if (stillMissing > 0) {
+            countN("missing", stillMissing);
+            log.warn("시세 없음 - {}건 (asOf={})", stillMissing, asOf);
+        }
+        return byStockId;
+    }
+
     private void count(String result) {
-        meterRegistry.counter("newspin.stock.price.lookup", "result", result).increment();
+        countN(result, 1);
+    }
+
+    private void countN(String result, int n) {
+        if (n > 0) {
+            meterRegistry.counter("newspin.stock.price.lookup", "result", result).increment(n);
+        }
     }
 }

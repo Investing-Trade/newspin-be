@@ -1,6 +1,7 @@
 package org.gp.newspinbe.domain.stock.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,20 @@ public interface StockPriceRepository extends JpaRepository<StockPrice, Long> {
 
     /** 기준일(포함) 이하의 최근 시세. 미래 시세 노출 금지 (C-5). */
     List<StockPrice> findTop11ByStockAndPriceDateLessThanEqualOrderByPriceDateDesc(Stock stock, LocalDate asOfDate);
+
+    /** 여러 종목의 기준일 종가를 한 번에 (I-2: 종목별 반복 조회 제거). */
+    @Query("SELECT sp FROM StockPrice sp JOIN FETCH sp.stock " +
+            "WHERE sp.stock.stockId IN :stockIds AND sp.priceDate = :date")
+    List<StockPrice> findByStockIdsAndPriceDate(@Param("stockIds") Collection<Long> stockIds,
+            @Param("date") LocalDate date);
+
+    /** 여러 종목의 '기준일 직전' 종가 (종목별 최신 1건). */
+    @Query("SELECT sp FROM StockPrice sp JOIN FETCH sp.stock " +
+            "WHERE sp.stock.stockId IN :stockIds AND sp.priceDate = " +
+            "(SELECT MAX(sp2.priceDate) FROM StockPrice sp2 " +
+            " WHERE sp2.stock = sp.stock AND sp2.priceDate < :date)")
+    List<StockPrice> findLatestBeforeByStockIds(@Param("stockIds") Collection<Long> stockIds,
+            @Param("date") LocalDate date);
 
     @Query("SELECT sp FROM StockPrice sp JOIN FETCH sp.stock WHERE sp.priceDate = :priceDate")
     List<StockPrice> findAllByPriceDateWithStock(@Param("priceDate") LocalDate priceDate);

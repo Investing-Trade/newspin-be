@@ -3,6 +3,7 @@ package org.gp.newspinbe.domain.simulation.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.gp.newspinbe.domain.news.dto.response.NewsResponse;
@@ -15,7 +16,6 @@ import org.gp.newspinbe.domain.simulation.repository.AssetHistoryRepository;
 import org.gp.newspinbe.domain.simulation.repository.PortfolioRepository;
 import org.gp.newspinbe.domain.simulation.repository.SimulationSessionRepository;
 import org.gp.newspinbe.domain.stock.application.StockPriceResolver;
-import org.gp.newspinbe.domain.stock.domain.Stock;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -109,15 +109,15 @@ public class NextDayService {
         return assetHistoryRepository.save(history);
     }
 
-    // 총 주식 평가액 계산
+    // 총 주식 평가액 계산 — 보유 종목 시세를 한 번에 조회 (I-2)
     private BigDecimal calculateTotalStockValue(SimulationSession session, LocalDate date) {
         List<Portfolio> portfolios = portfolioRepository.findBySessionWithStock(session);
+        Map<Long, BigDecimal> closes = stockPriceResolver.closesForValuation(
+                portfolios.stream().map(Portfolio::getStock).toList(), date);
+
         BigDecimal totalStockValue = BigDecimal.ZERO;
-
         for (Portfolio portfolio : portfolios) {
-            Stock stock = portfolio.getStock();
-            BigDecimal closePrice = stockPriceResolver.closeForValuation(stock, date);
-
+            BigDecimal closePrice = closes.getOrDefault(portfolio.getStock().getStockId(), BigDecimal.ZERO);
             totalStockValue = totalStockValue.add(
                     closePrice.multiply(BigDecimal.valueOf(portfolio.getQuantity())));
         }
