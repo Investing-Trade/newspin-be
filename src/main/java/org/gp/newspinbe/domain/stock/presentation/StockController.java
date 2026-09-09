@@ -22,20 +22,20 @@ public class StockController {
 
     private final StockService stockService;
 
-    // 특정 종목의 전후 5영업일 주가 조회
+    // 특정 종목의 기준일까지의 주가 히스토리 (기준일 이후 시세는 반환하지 않음 — C-5)
     @GetMapping("/{stockCode}/price-range")
     public ResponseEntity<ApiResponse<StockPriceHistoryResponse>> getStockPriceHistoryRange(
             @PathVariable String stockCode,
             @RequestParam LocalDate date) {
-        StockPriceHistoryResponse response = stockService.getStockPriceHistoryAroundDate(stockCode, date);
+        StockPriceHistoryResponse response = stockService.getStockPriceHistoryUpTo(stockCode, date);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 전체 종목의 전후 5영업일 주가 조회 (비교용)
+    // 전체 종목의 기준일까지의 주가 히스토리 (비교용)
     @GetMapping("/price-range")
     public ResponseEntity<ApiResponse<List<StockPriceHistoryResponse>>> getAllStocksPriceHistoryRange(
             @RequestParam LocalDate date) {
-        List<StockPriceHistoryResponse> response = stockService.getAllStocksPriceHistoryAroundDate(date);
+        List<StockPriceHistoryResponse> response = stockService.getAllStocksPriceHistoryUpTo(date);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

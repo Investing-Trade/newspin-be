@@ -37,11 +37,11 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | S0 | 관측성 (Actuator·Micrometer·traceId·구조화 로깅) | I-12 | 인프라 | ✅ | [S0](improvements/S0-groundwork.md) |
 | S0 | k6 부하 스크립트 (기준선 수치는 각 성능 항목에서) | - | 인프라 | ✅ | [k6](benchmarks/k6/) |
 | S0 | GitHub Actions CI (build + test) | I-14 | 인프라 | ✅ | [ci.yml](../.github/workflows/ci.yml) |
-| 1 | AIService 하드코딩 테스트 호출 제거 | C-1 | 심각 | ⬜ | - |
-| 2 | 로컬 원큐 실행 + 시드 데이터 검증 | C-2 | 심각 | ⬜ | - |
-| 3 | 미래 시세 유출 차단 (lookahead) | C-5, S-1 | 심각 | ⬜ | - |
-| 4 | 모의투자 가격 검증 재설계 | C-3 | 심각 | ⬜ | - |
-| 5 | GeminiService 응답 파싱 방어 + 재시도 | C-4 | 심각 | ⬜ | - |
+| 1 | AIService 하드코딩 테스트 호출 제거 | C-1 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
+| 2 | 로컬 원큐 실행 + 시드 데이터 검증 | C-2 | 심각 | ✅ | S0 에서 완료 |
+| 3 | 미래 시세 유출 차단 (lookahead) | C-5, S-1 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
+| 4 | 모의투자 가격 검증 재설계 | C-3 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
+| 5 | GeminiService 응답 파싱 방어 + 재시도 | C-4 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
 | 6 | 트랜잭션 경계 분리 (외부 호출 축출) | R-1 | 위험 | ⬜ | - |
 | 7 | AI 연동 회복탄력성 (Resilience4j) | R-2 | 위험 | ⬜ | - |
 | 8 | AssetHistory 동시성 처리 | R-3 | 위험 | ⬜ | - |

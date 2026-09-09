@@ -81,11 +81,12 @@ public class InvestmentReportService {
         String prompt = buildPrompt(session, allTrades, assetHistories, eventNews, allImpacts);
         String aiResponse = geminiService.generateContent(prompt);
 
-        // 5. AI 응답 파싱
-        String overallAnalysis = extractSection(aiResponse, "종합 분석");
-        String newsResponseAnalysis = extractSection(aiResponse, "뉴스 대응 분석");
-        String riskManagementAnalysis = extractSection(aiResponse, "리스크 관리 분석");
-        String improvementSuggestions = extractSection(aiResponse, "개선 제안");
+        // 5. AI 응답 파싱. 마커가 아예 없으면(= LLM fallback 메시지 등) 그 메시지를 그대로 노출.
+        boolean parseable = aiResponse != null && aiResponse.contains("## ");
+        String overallAnalysis = parseable ? extractSection(aiResponse, "종합 분석") : aiResponse;
+        String newsResponseAnalysis = parseable ? extractSection(aiResponse, "뉴스 대응 분석") : aiResponse;
+        String riskManagementAnalysis = parseable ? extractSection(aiResponse, "리스크 관리 분석") : aiResponse;
+        String improvementSuggestions = parseable ? extractSection(aiResponse, "개선 제안") : aiResponse;
 
         // 6. 응답 구성
         return InvestmentReportResponse.builder()

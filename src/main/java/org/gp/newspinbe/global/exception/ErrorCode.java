@@ -43,7 +43,8 @@ public enum ErrorCode {
 	INVALID_TRADE("S004", "유효하지 않은 거래입니다.", HttpStatus.BAD_REQUEST),
 	STOCK_NOT_FOUND("S005", "종목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	INVALID_SESSION_STATUS("S006", "세션 상태가 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
-	INSUFFICIENT_STOCK_QUANTITY("S007", "보유 수량이 부족합니다.", HttpStatus.BAD_REQUEST);
+	INSUFFICIENT_STOCK_QUANTITY("S007", "보유 수량이 부족합니다.", HttpStatus.BAD_REQUEST),
+	PRICE_MISMATCH("S008", "주문 가격이 현재 시세와 크게 달라 거래할 수 없습니다. 새로고침 후 다시 시도해주세요.", HttpStatus.CONFLICT);
 
 	private final HttpStatus status;
 	private final String code;

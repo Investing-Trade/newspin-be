@@ -1,6 +1,7 @@
 package org.gp.newspinbe.domain.simulation.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 import org.gp.newspinbe.domain.simulation.domain.Portfolio;
@@ -47,8 +48,9 @@ public class TradeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.STOCK_NOT_FOUND));
 
         BigDecimal currentPrice = getCurrentPrice(stock, session.getCurrentSimulationDate());
-        // ✅ 모의투자이므로 가격 검증 제거 - 프론트 price와 DB price 불일치 문제 해결
-        // validatePrice(request.getPrice(), currentPrice);
+        // 클라이언트가 보낸 가격은 신뢰하지 않는다. 서버 시세와 허용 오차 안에 있는지만 검증하고,
+        // 체결은 항상 서버 시세로 한다 (C-3).
+        validatePrice(request.getPrice(), currentPrice);
         Trade trade;
         if (request.getTradeType() == TradeType.BUY) {
             trade = executeBuy(session, stock, request.getQuantity(), currentPrice);
@@ -151,10 +153,24 @@ public class TradeService {
             .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TRADE));
     }
 
-    // 요청 가격 검증 (프론트에서 보낸 가격과 서버 가격 일치 여부) - 슬리피지 방지 및 데이터 무결성 체크
-    private void validatePrice(BigDecimal requestPrice, BigDecimal currentPrice) {
-        if (requestPrice.compareTo(currentPrice) != 0) {
+    /** 클라이언트가 화면에서 본 가격과 서버 시세의 허용 오차 (1%). */
+    private static final BigDecimal PRICE_TOLERANCE = new BigDecimal("0.01");
+
+    /**
+     * 클라이언트 표시가와 서버 시세가 허용 오차 안인지 검증한다.
+     * 정상 흐름에서 둘은 같은 일봉 종가라 거의 일치한다. 크게 어긋나면(스테일 데이터·조작)
+     * 사용자가 의도한 가격이 아니므로 거절한다. 체결가는 이 값과 무관하게 서버 시세를 쓴다.
+     */
+    private void validatePrice(BigDecimal clientPrice, BigDecimal serverPrice) {
+        if (clientPrice == null || serverPrice.signum() <= 0) {
             throw new CustomException(ErrorCode.INVALID_TRADE);
+        }
+        BigDecimal diffRatio = clientPrice.subtract(serverPrice).abs()
+                .divide(serverPrice, 6, RoundingMode.HALF_UP);
+        if (diffRatio.compareTo(PRICE_TOLERANCE) > 0) {
+            log.warn("가격 불일치 - client: {}, server: {}, diff: {}%", clientPrice, serverPrice,
+                    diffRatio.movePointRight(2));
+            throw new CustomException(ErrorCode.PRICE_MISMATCH);
         }
     }
 }

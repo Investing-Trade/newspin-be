@@ -2,64 +2,171 @@ package org.gp.newspinbe.global.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.gp.newspinbe.global.config.RestClientConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.ResourceAccessException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Gemini generateContent 호출. 외부 LLM 은 성공을 보장하지 않으므로
+ * (a) 일시 오류(네트워크/5xx/429)는 짧게 재시도하고
+ * (b) 안전 필터 차단·응답 형식 이상은 재시도 없이 사용자에게 보여줄 fallback 을 돌려준다. (C-4)
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class GeminiService {
 
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long[] BACKOFF_MS = {0L, 500L, 1500L};
+
+    /** text 없이 생성이 끝난 경우의 사유들 — 재시도해도 동일하므로 즉시 fallback. */
+    private static final Set<String> BLOCKED_REASONS =
+            Set.of("SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "OTHER");
+
+    static final String FALLBACK_BLOCKED = "AI가 이 내용에 대한 답변을 생성하지 못했습니다. 다른 표현으로 다시 시도해 주세요.";
+    static final String FALLBACK_ERROR = "AI 분석을 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+
     private final RestClient geminiRestClient;
     private final RestClientConfig restClientConfig;
 
     public String generateContent(String prompt) {
-        Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(
-                                Map.of("text", prompt)))),
-                "generationConfig", Map.of(
-                        "temperature", 0.7,
-                        "maxOutputTokens", 4096));
+        RuntimeException last = null;
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                Map<?, ?> response = call(prompt);
+                return parseText(response); // 파싱 실패/차단은 GeminiUnavailableException 로 던짐 (재시도 안 함)
+            } catch (GeminiBlockedException e) {
+                log.warn("Gemini 응답 차단 - finishReason: {}", e.getMessage());
+                return FALLBACK_BLOCKED;
+            } catch (GeminiUnavailableException e) {
+                log.error("Gemini 응답 형식 이상: {}", e.getMessage());
+                return FALLBACK_ERROR;
+            } catch (ResourceAccessException | RestClientResponseException e) {
+                last = e;
+                if (!isRetryable(e) || attempt == MAX_ATTEMPTS) {
+                    break;
+                }
+                log.warn("Gemini 호출 실패 (attempt {}/{}), 재시도: {}", attempt, MAX_ATTEMPTS, e.toString());
+                sleep(BACKOFF_MS[attempt]);
+            } catch (Exception e) {
+                log.error("Gemini 호출 중 예상치 못한 오류", e);
+                return FALLBACK_ERROR;
+            }
+        }
+        log.error("Gemini 호출 재시도 소진", last);
+        return FALLBACK_ERROR;
+    }
 
+    private Map<?, ?> call(String prompt) {
+        Map<String, Object> body = Map.of(
+                "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
+                "generationConfig", Map.of("temperature", 0.7, "maxOutputTokens", 4096));
+
+        return geminiRestClient.post()
+                .uri(b -> b.path(":generateContent")
+                        .queryParam("key", restClientConfig.getGeminiApiKey())
+                        .build())
+                .body(body)
+                .retrieve()
+                .body(Map.class);
+    }
+
+    static String parseText(Map<?, ?> response) {
+        if (response == null) {
+            throw new GeminiUnavailableException("response is null");
+        }
+        // 프롬프트 자체가 차단된 경우
+        Map<?, ?> promptFeedback = asMap(response.get("promptFeedback"));
+        if (promptFeedback != null && promptFeedback.get("blockReason") != null) {
+            throw new GeminiBlockedException("prompt:" + promptFeedback.get("blockReason"));
+        }
+
+        List<?> candidates = asList(response.get("candidates"));
+        if (candidates == null || candidates.isEmpty()) {
+            throw new GeminiUnavailableException("no candidates");
+        }
+        Map<?, ?> candidate = asMap(candidates.get(0));
+        String finishReason = candidate == null ? null : String.valueOf(candidate.get("finishReason"));
+
+        String text = extractText(candidate);
+        if (text != null && !text.isBlank()) {
+            return text;
+        }
+        if (finishReason != null && BLOCKED_REASONS.contains(finishReason)) {
+            throw new GeminiBlockedException(finishReason);
+        }
+        throw new GeminiUnavailableException("empty text (finishReason=" + finishReason + ")");
+    }
+
+    private static String extractText(Map<?, ?> candidate) {
+        if (candidate == null) {
+            return null;
+        }
+        Map<?, ?> content = asMap(candidate.get("content"));
+        if (content == null) {
+            return null;
+        }
+        List<?> parts = asList(content.get("parts"));
+        if (parts == null || parts.isEmpty()) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Object p : parts) {
+            Map<?, ?> part = asMap(p);
+            Object t = part == null ? null : part.get("text");
+            if (t != null) {
+                sb.append(t);
+            }
+        }
+        return sb.isEmpty() ? null : sb.toString();
+    }
+
+    private boolean isRetryable(Exception e) {
+        if (e instanceof ResourceAccessException) {
+            return true; // 연결 실패 / 타임아웃
+        }
+        if (e instanceof RestClientResponseException re) {
+            int code = re.getStatusCode().value();
+            return code == 429 || code >= 500;
+        }
+        return false;
+    }
+
+    private static Map<?, ?> asMap(Object o) {
+        return o instanceof Map<?, ?> m ? m : null;
+    }
+
+    private static List<?> asList(Object o) {
+        return o instanceof List<?> l ? l : null;
+    }
+
+    private static void sleep(long ms) {
+        if (ms <= 0) {
+            return;
+        }
         try {
-            Map<?, ?> response = geminiRestClient
-                    .post()
-                    .uri(uriBuilder -> uriBuilder
-                            .path(":generateContent")
-                            .queryParam("key", restClientConfig.getGeminiApiKey())
-                            .build())
-                    .body(requestBody)
-                    .retrieve()
-                    .body(Map.class);
+            Thread.sleep(ms);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
-            if (response == null) {
-                log.error("Gemini API 응답이 null입니다.");
-                return "AI 분석을 수행할 수 없습니다.";
-            }
+    static class GeminiBlockedException extends RuntimeException {
+        GeminiBlockedException(String reason) {
+            super(reason);
+        }
+    }
 
-            // 응답 파싱: response.candidates[0].content.parts[0].text
-            List<?> candidates = (List<?>) response.get("candidates");
-            if (candidates == null || candidates.isEmpty()) {
-                log.error("Gemini API 응답에 candidates가 없습니다.");
-                return "AI 분석을 수행할 수 없습니다.";
-            }
-
-            Map<?, ?> candidate = (Map<?, ?>) candidates.get(0);
-            Map<?, ?> content = (Map<?, ?>) candidate.get("content");
-            List<?> parts = (List<?>) content.get("parts");
-            Map<?, ?> part = (Map<?, ?>) parts.get(0);
-
-            return (String) part.get("text");
-
-        } catch (Exception e) {
-            log.error("Gemini API 호출 실패: {}", e.getMessage(), e);
-            return "AI 분석 중 오류가 발생했습니다: " + e.getMessage();
+    static class GeminiUnavailableException extends RuntimeException {
+        GeminiUnavailableException(String reason) {
+            super(reason);
         }
     }
 }
