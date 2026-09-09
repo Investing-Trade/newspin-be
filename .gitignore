@@ -39,7 +39,6 @@ out/
 ### env ###
 application-local.yml
 application-prod.yml
-/docs
 
 ### Data Files ###
 src/main/resources/data/
