@@ -1,4 +1,8 @@
-# 통합 테스트 프로필. DataSource/Redis 는 Testcontainers @ServiceConnection 이 주입한다.
+# 통합 테스트 프로필.
+# - MySQL 은 Testcontainers @ServiceConnection 이 주입한다.
+# - Redis 는 RedisConfig 가 @Value 로 직접 팩토리를 만들어 @ServiceConnection 을 우회하므로
+#   여기서 값을 채워 컨텍스트만 로드시킨다. (테스트가 Redis 를 실제로 호출하지는 않음)
+#   RedisConfig 를 오토컨피그 기반으로 바꾸는 건 이후 스테이지에서.
 spring:
   datasource:
     url: jdbc:mysql://localhost:3307/newspin
@@ -15,7 +19,9 @@ spring:
     enabled: true
   data:
     redis:
-      password:
+      host: localhost
+      port: 6379
+      password: ""
   jwt:
     secret: dGVzdC1zZWNyZXQta2V5LWZvci1uZXdzcGluLWJhY2tlbmQtaW50ZWdyYXRpb24=
     access-token:
