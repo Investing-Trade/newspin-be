@@ -45,24 +45,6 @@ public class AIService {
     @Transactional
     public AIAnalysisResponse analyzeUserJudgment(Long userId, Long newsId, AIAnalysisRequest aiAnalysisRequest) {
 
-        // 임시 테스트
-        try {
-            String testJson = "{\"request_id\":\"test\",\"article\":{\"article_id\":1,\"title\":\"test\",\"content\":\"테스트\"},\"options\":{\"max_snippets\":12,\"include_weak_snippets\":false,\"include_raw_model_output\":false}}";
-            HttpClient testClient = HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .build();
-            HttpRequest testRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(aiServiceUrl + "/api/v1/analyze"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(testJson))
-                    .build();
-            HttpResponse<String> testResponse = testClient.send(testRequest, HttpResponse.BodyHandlers.ofString());
-            log.info("테스트 응답 상태코드: {}", testResponse.statusCode());
-            log.info("테스트 응답 body: {}", testResponse.body());
-        } catch (Exception e) {
-            log.error("테스트 실패: {}", e.getMessage());
-        }
-
         NewsArticle newsArticle = newsArticleRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NEWS_NOT_FOUND));
 
