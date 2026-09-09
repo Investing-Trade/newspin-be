@@ -1,6 +1,7 @@
 package org.gp.newspinbe.global.util;
 
 import java.time.Duration;
+import java.util.Set;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -31,5 +32,13 @@ public class RedisUtil {
 
 	public void deleteData(String key) {
 		redisTemplate.delete(key);
+	}
+
+	/** 패턴에 해당하는 키를 모두 삭제 (예: 한 유저의 모든 리프레시 토큰). */
+	public void deleteByPattern(String pattern) {
+		Set<String> keys = redisTemplate.keys(pattern);
+		if (keys != null && !keys.isEmpty()) {
+			redisTemplate.delete(keys);
+		}
 	}
 }

@@ -63,7 +63,6 @@ public class SecurityConfig {
 				authorize
 					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 					.requestMatchers(PERMIT_ALL_PATTERNS).permitAll()
-					.requestMatchers(HttpMethod.DELETE, "/user").hasRole("ADMIN")
 					.anyRequest().authenticated()
 			)
 			.cors(configurer -> configurer.configurationSource(corsConfigurationSource()));

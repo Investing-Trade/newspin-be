@@ -122,6 +122,8 @@ public class UserService {
 
 		String username = jwtTokenProvider.getUserNameFromToken(refreshRequest.getRefreshToken());
 
+		// 토큰 회전: 방금 쓴 리프레시 토큰은 폐기하고 새로 발급
+		jwtTokenProvider.invalidateRefreshToken(refreshRequest.getRefreshToken());
 		Authentication authentication = getAuthenticationForRefresh(username);
 
 		JwtToken newTokens = jwtTokenProvider.generateToken(authentication);

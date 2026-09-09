@@ -53,9 +53,9 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 14 | Redis 캐시 계층 실제 도입 | I-3 | 개선 | ✅ | [S3](improvements/S3-redis-cache.md) |
 | 15 | HTTP 클라이언트 통일 (RestClient 빈) | I-5 | 개선 | ✅ | [S2-A](improvements/S2-resilience.md) (AIService 의 raw HttpClient 제거) |
 | 16 | InvestmentReport 구조화 출력 (JSON 스키마) | I-4 | 개선 | ⬜ | - |
-| 17 | 권한 체계 정비 (ROLE_ 접두사 버그) | I-6 | 개선 | ⬜ | - |
-| 18 | Redis refresh token 키 (멀티 디바이스) | I-7 | 개선 | ⬜ | - |
-| 19 | SimulationSession 데드코드 정리·로직 일원화 | I-9 | 개선 | ⬜ | - |
+| 17 | 권한 체계 정비 (ROLE_ 접두사 버그) | I-6 | 개선 | ✅ | [S3](improvements/S3-roles-refresh-cleanup.md) |
+| 18 | Redis refresh token 키 (멀티 디바이스) | I-7 | 개선 | ✅ | [S3](improvements/S3-roles-refresh-cleanup.md) |
+| 19 | SimulationSession 데드코드 정리·로직 일원화 | I-9 | 개선 | ✅ | [S3](improvements/S3-roles-refresh-cleanup.md) |
 | 20 | 목록 API 페이지네이션 | I-10 | 개선 | ⬜ | - |
 | 21 | 리포트 생성 비동기화 | I-11 | 개선 | ⬜ | - |
 | 22 | 학습-평가 사일로 완화 | S-2 | 개선 | ⬜ | - |
