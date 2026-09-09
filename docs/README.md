@@ -46,12 +46,12 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 7 | AI 연동 회복탄력성 (Resilience4j) | R-2 | 위험 | ✅ | [S2-A](improvements/S2-resilience.md) |
 | 8 | AssetHistory 동시성 처리 | R-3 | 위험 | ✅ | [S2-B](improvements/S2-concurrency.md) |
 | 9 | 세션 거래 동시성 (잔고 lost update) | R-4 | 위험 | ✅ | [S2-B](improvements/S2-concurrency.md) |
-| 10 | 시세 결측 조용한 0 처리 → 관측 가능화 | R-5 | 위험 | ⬜ | - |
-| 11 | 프로필/보안 설정 분리 (CORS·ddl-auto·로깅) | R-6, I-8 | 위험 | ⬜ | - |
+| 10 | 시세 결측 조용한 0 처리 → 관측 가능화 | R-5 | 위험 | ✅ | [S2-C](improvements/S2-config.md) |
+| 11 | 프로필/보안 설정 분리 (CORS·ddl-auto·로깅) | R-6, I-8 | 위험 | ✅ | [S2-C](improvements/S2-config.md) |
 | 12 | 뉴스 랜덤 조회 쿼리 최적화 | I-1 | 개선 | ⬜ | - |
 | 13 | StockPrice 반복 조회 배치화 | I-2 | 개선 | ⬜ | - |
 | 14 | Redis 캐시 계층 실제 도입 | I-3 | 개선 | ⬜ | - |
-| 15 | HTTP 클라이언트 통일 (RestClient 빈) | I-5 | 개선 | ⬜ | - |
+| 15 | HTTP 클라이언트 통일 (RestClient 빈) | I-5 | 개선 | ✅ | [S2-A](improvements/S2-resilience.md) (AIService 의 raw HttpClient 제거) |
 | 16 | InvestmentReport 구조화 출력 (JSON 스키마) | I-4 | 개선 | ⬜ | - |
 | 17 | 권한 체계 정비 (ROLE_ 접두사 버그) | I-6 | 개선 | ⬜ | - |
 | 18 | Redis refresh token 키 (멀티 디바이스) | I-7 | 개선 | ⬜ | - |
