@@ -1,0 +1,607 @@
+[
+  {
+    "articleId": 606,
+    "eventType": "PANDEMIC",
+    "summary": "우한 폐렴 확산 — 바이오·마스크주 급등, 여행·항공 경계감",
+    "impacts": [
+      {
+        "stockCode": "079160",
+        "impactRate": -11.9,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 11.9% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "004170",
+        "impactRate": -11.7,
+        "impactReason": "신세계: 이벤트 후 3거래일 11.7% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": -11.4,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 11.4% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": -10.0,
+        "impactReason": "대한항공: 이벤트 후 3거래일 10.0% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": -9.9,
+        "impactReason": "하나투어: 이벤트 후 3거래일 9.9% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "080160",
+        "impactRate": -8.7,
+        "impactReason": "모두투어: 이벤트 후 3거래일 8.7% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "023530",
+        "impactRate": -8.4,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 8.4% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "041510",
+        "impactRate": -7.9,
+        "impactReason": "SM엔터테인먼트: 이벤트 후 3거래일 7.9% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "005930",
+        "impactRate": -5.1,
+        "impactReason": "삼성전자: 이벤트 후 3거래일 5.1% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": -4.9,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 4.9% 하락. 외식 수요 위축, 필수 소비 방어"
+      },
+      {
+        "stockCode": "066570",
+        "impactRate": -4.5,
+        "impactReason": "LG전자: 이벤트 후 3거래일 4.5% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "139480",
+        "impactRate": -4.2,
+        "impactReason": "이마트: 이벤트 후 3거래일 4.2% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "207940",
+        "impactRate": 8.6,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 8.6% 상승. 진단·치료제 기대와 방어주 성격"
+      }
+    ]
+  },
+  {
+    "articleId": 672,
+    "eventType": "PANDEMIC",
+    "summary": "신종 코로나 공포로 코스피 급락",
+    "impacts": [
+      {
+        "stockCode": "079160",
+        "impactRate": -7.1,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 7.1% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": -4.5,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 4.5% 하락. 외식 수요 위축, 필수 소비 방어"
+      },
+      {
+        "stockCode": "000100",
+        "impactRate": -4.2,
+        "impactReason": "유한양행: 이벤트 후 3거래일 4.2% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "005930",
+        "impactRate": -4.1,
+        "impactReason": "삼성전자: 이벤트 후 3거래일 4.1% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "023530",
+        "impactRate": -4.1,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 4.1% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      }
+    ]
+  },
+  {
+    "articleId": 888,
+    "eventType": "PANDEMIC",
+    "summary": "WHO 국제공중보건비상사태 선언 — 항공 매출 타격 전망",
+    "impacts": [
+      {
+        "stockCode": "080160",
+        "impactRate": 6.1,
+        "impactReason": "모두투어: 이벤트 후 3거래일 6.1% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": 7.1,
+        "impactReason": "하나투어: 이벤트 후 3거래일 7.1% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": 8.2,
+        "impactReason": "대한항공: 이벤트 후 3거래일 8.2% 상승. 이동 제한으로 여객·면세 수요 급감"
+      }
+    ]
+  },
+  {
+    "articleId": 955,
+    "eventType": "PANDEMIC",
+    "summary": "유통·면세 코로나 충격 — 백화점·마트 임시 휴점 확산",
+    "impacts": [
+      {
+        "stockCode": "128940",
+        "impactRate": 4.1,
+        "impactReason": "한미약품: 이벤트 후 3거래일 4.1% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "018260",
+        "impactRate": 4.4,
+        "impactReason": "삼성SDS: 이벤트 후 3거래일 4.4% 상승. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "080160",
+        "impactRate": 5.2,
+        "impactReason": "모두투어: 이벤트 후 3거래일 5.2% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": 5.2,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 5.2% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "139480",
+        "impactRate": 5.6,
+        "impactReason": "이마트: 이벤트 후 3거래일 5.6% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "079160",
+        "impactRate": 6.3,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 6.3% 상승. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "004170",
+        "impactRate": 6.7,
+        "impactReason": "신세계: 이벤트 후 3거래일 6.7% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "005930",
+        "impactRate": 6.8,
+        "impactReason": "삼성전자: 이벤트 후 3거래일 6.8% 상승. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": 7.2,
+        "impactReason": "하나투어: 이벤트 후 3거래일 7.2% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "207940",
+        "impactRate": 8.2,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 8.2% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": 11.8,
+        "impactReason": "대한항공: 이벤트 후 3거래일 11.8% 상승. 이동 제한으로 여객·면세 수요 급감"
+      }
+    ]
+  },
+  {
+    "articleId": 1442,
+    "eventType": "PANDEMIC",
+    "summary": "대구·신천지 집단감염 — 오프라인 유통 직격",
+    "impacts": [
+      {
+        "stockCode": "023530",
+        "impactRate": -7.0,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 7.0% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "018260",
+        "impactRate": -6.4,
+        "impactReason": "삼성SDS: 이벤트 후 3거래일 6.4% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "066570",
+        "impactRate": -6.2,
+        "impactReason": "LG전자: 이벤트 후 3거래일 6.2% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "004170",
+        "impactRate": -5.7,
+        "impactReason": "신세계: 이벤트 후 3거래일 5.7% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "128940",
+        "impactRate": -5.3,
+        "impactReason": "한미약품: 이벤트 후 3거래일 5.3% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": -5.1,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 5.1% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": -5.1,
+        "impactReason": "대한항공: 이벤트 후 3거래일 5.1% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "007070",
+        "impactRate": -4.9,
+        "impactReason": "GS리테일: 이벤트 후 3거래일 4.9% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": -4.6,
+        "impactReason": "하나투어: 이벤트 후 3거래일 4.6% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "079160",
+        "impactRate": -4.5,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 4.5% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": -4.3,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 4.3% 하락. 외식 수요 위축, 필수 소비 방어"
+      }
+    ]
+  },
+  {
+    "articleId": 1504,
+    "eventType": "ECONOMIC",
+    "summary": "감염병 위기경보 '심각' 격상 — 코스피 2100 붕괴",
+    "impacts": [
+      {
+        "stockCode": "018260",
+        "impactRate": -4.9,
+        "impactReason": "삼성SDS: 이벤트 후 3거래일 4.9% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "207940",
+        "impactRate": 4.1,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 4.1% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "000100",
+        "impactRate": 4.6,
+        "impactReason": "유한양행: 이벤트 후 3거래일 4.6% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "139480",
+        "impactRate": 8.3,
+        "impactReason": "이마트: 이벤트 후 3거래일 8.3% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      }
+    ]
+  },
+  {
+    "articleId": 1912,
+    "eventType": "PANDEMIC",
+    "summary": "WHO 팬데믹 선언 — 전 업종 동반 폭락",
+    "impacts": [
+      {
+        "stockCode": "080160",
+        "impactRate": -17.2,
+        "impactReason": "모두투어: 이벤트 후 3거래일 17.2% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": -16.6,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 16.6% 하락. 외식 수요 위축, 필수 소비 방어"
+      },
+      {
+        "stockCode": "207940",
+        "impactRate": -13.6,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 13.6% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": -12.1,
+        "impactReason": "하나투어: 이벤트 후 3거래일 12.1% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "079160",
+        "impactRate": -12.0,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 12.0% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "066570",
+        "impactRate": -10.9,
+        "impactReason": "LG전자: 이벤트 후 3거래일 10.9% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "018260",
+        "impactRate": -9.5,
+        "impactReason": "삼성SDS: 이벤트 후 3거래일 9.5% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "035420",
+        "impactRate": -9.3,
+        "impactReason": "네이버: 이벤트 후 3거래일 9.3% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "023530",
+        "impactRate": -9.3,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 9.3% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": -8.8,
+        "impactReason": "대한항공: 이벤트 후 3거래일 8.8% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "041510",
+        "impactRate": -8.5,
+        "impactReason": "SM엔터테인먼트: 이벤트 후 3거래일 8.5% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "128940",
+        "impactRate": -7.7,
+        "impactReason": "한미약품: 이벤트 후 3거래일 7.7% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "005930",
+        "impactRate": -6.9,
+        "impactReason": "삼성전자: 이벤트 후 3거래일 6.9% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "007070",
+        "impactRate": -6.4,
+        "impactReason": "GS리테일: 이벤트 후 3거래일 6.4% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": -6.3,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 6.3% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "031440",
+        "impactRate": -5.2,
+        "impactReason": "신세계푸드: 이벤트 후 3거래일 5.2% 하락. 외식 수요 위축, 필수 소비 방어"
+      }
+    ]
+  },
+  {
+    "articleId": 1980,
+    "eventType": "ECONOMIC",
+    "summary": "코스피 8% 폭락, 서킷브레이커 발동",
+    "impacts": [
+      {
+        "stockCode": "079160",
+        "impactRate": -17.3,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 17.3% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": -13.5,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 13.5% 하락. 외식 수요 위축, 필수 소비 방어"
+      },
+      {
+        "stockCode": "080160",
+        "impactRate": -12.9,
+        "impactReason": "모두투어: 이벤트 후 3거래일 12.9% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "207940",
+        "impactRate": -12.3,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 12.3% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": -12.1,
+        "impactReason": "하나투어: 이벤트 후 3거래일 12.1% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": -12.1,
+        "impactReason": "대한항공: 이벤트 후 3거래일 12.1% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "035420",
+        "impactRate": -12.0,
+        "impactReason": "네이버: 이벤트 후 3거래일 12.0% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "023530",
+        "impactRate": -10.0,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 10.0% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "041510",
+        "impactRate": -9.1,
+        "impactReason": "SM엔터테인먼트: 이벤트 후 3거래일 9.1% 하락. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "005930",
+        "impactRate": -8.7,
+        "impactReason": "삼성전자: 이벤트 후 3거래일 8.7% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "066570",
+        "impactRate": -8.6,
+        "impactReason": "LG전자: 이벤트 후 3거래일 8.6% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "068270",
+        "impactRate": -7.9,
+        "impactReason": "셀트리온: 이벤트 후 3거래일 7.9% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "018260",
+        "impactRate": -7.2,
+        "impactReason": "삼성SDS: 이벤트 후 3거래일 7.2% 하락. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": -7.2,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 7.2% 하락. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "007070",
+        "impactRate": -6.7,
+        "impactReason": "GS리테일: 이벤트 후 3거래일 6.7% 하락. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      }
+    ]
+  },
+  {
+    "articleId": 2200,
+    "eventType": "ECONOMIC",
+    "summary": "한미 통화스와프 체결 — 시총 상위주 반등",
+    "impacts": [
+      {
+        "stockCode": "079160",
+        "impactRate": 4.2,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 4.2% 상승. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "041510",
+        "impactRate": 5.1,
+        "impactReason": "SM엔터테인먼트: 이벤트 후 3거래일 5.1% 상승. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": 5.5,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 5.5% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "128940",
+        "impactRate": 6.2,
+        "impactReason": "한미약품: 이벤트 후 3거래일 6.2% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "004170",
+        "impactRate": 6.2,
+        "impactReason": "신세계: 이벤트 후 3거래일 6.2% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "080160",
+        "impactRate": 6.2,
+        "impactReason": "모두투어: 이벤트 후 3거래일 6.2% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "005930",
+        "impactRate": 7.2,
+        "impactReason": "삼성전자: 이벤트 후 3거래일 7.2% 상승. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "066570",
+        "impactRate": 7.5,
+        "impactReason": "LG전자: 이벤트 후 3거래일 7.5% 상승. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": 9.9,
+        "impactReason": "하나투어: 이벤트 후 3거래일 9.9% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "207940",
+        "impactRate": 10.5,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 10.5% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "023530",
+        "impactRate": 10.9,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 10.9% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": 13.8,
+        "impactReason": "대한항공: 이벤트 후 3거래일 13.8% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": 16.9,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 16.9% 상승. 외식 수요 위축, 필수 소비 방어"
+      },
+      {
+        "stockCode": "068270",
+        "impactRate": 20.0,
+        "impactReason": "셀트리온: 이벤트 후 3거래일 20.0% 상승. 진단·치료제 기대와 방어주 성격"
+      }
+    ]
+  },
+  {
+    "articleId": 2259,
+    "eventType": "ECONOMIC",
+    "summary": "미 연준 무제한 QE·회사채 매입 — 위험자산 반등",
+    "impacts": [
+      {
+        "stockCode": "207940",
+        "impactRate": -6.9,
+        "impactReason": "삼성바이오로직스: 이벤트 후 3거래일 6.9% 하락. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "035420",
+        "impactRate": 5.1,
+        "impactReason": "네이버: 이벤트 후 3거래일 5.1% 상승. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "128940",
+        "impactRate": 7.8,
+        "impactReason": "한미약품: 이벤트 후 3거래일 7.8% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "007070",
+        "impactRate": 8.1,
+        "impactReason": "GS리테일: 이벤트 후 3거래일 8.1% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "008770",
+        "impactRate": 9.4,
+        "impactReason": "호텔신라: 이벤트 후 3거래일 9.4% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "041510",
+        "impactRate": 10.8,
+        "impactReason": "SM엔터테인먼트: 이벤트 후 3거래일 10.8% 상승. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "031440",
+        "impactRate": 11.0,
+        "impactReason": "신세계푸드: 이벤트 후 3거래일 11.0% 상승. 외식 수요 위축, 필수 소비 방어"
+      },
+      {
+        "stockCode": "000100",
+        "impactRate": 11.2,
+        "impactReason": "유한양행: 이벤트 후 3거래일 11.2% 상승. 진단·치료제 기대와 방어주 성격"
+      },
+      {
+        "stockCode": "066570",
+        "impactRate": 11.3,
+        "impactReason": "LG전자: 이벤트 후 3거래일 11.3% 상승. 지수 등락과 외국인 수급에 연동"
+      },
+      {
+        "stockCode": "080160",
+        "impactRate": 14.0,
+        "impactReason": "모두투어: 이벤트 후 3거래일 14.0% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "079160",
+        "impactRate": 15.3,
+        "impactReason": "CJ CGV: 이벤트 후 3거래일 15.3% 상승. 다중이용시설 기피로 관람·공연 타격"
+      },
+      {
+        "stockCode": "023530",
+        "impactRate": 16.5,
+        "impactReason": "롯데쇼핑: 이벤트 후 3거래일 16.5% 상승. 오프라인 점포 휴점과 소비 위축 vs 생필품 수요"
+      },
+      {
+        "stockCode": "039130",
+        "impactRate": 24.3,
+        "impactReason": "하나투어: 이벤트 후 3거래일 24.3% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "003490",
+        "impactRate": 26.3,
+        "impactReason": "대한항공: 이벤트 후 3거래일 26.3% 상승. 이동 제한으로 여객·면세 수요 급감"
+      },
+      {
+        "stockCode": "005610",
+        "impactRate": 34.7,
+        "impactReason": "SPC삼립: 이벤트 후 3거래일 34.7% 상승. 외식 수요 위축, 필수 소비 방어"
+      }
+    ]
+  }
+]

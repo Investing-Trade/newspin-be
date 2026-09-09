@@ -1,0 +1,40 @@
+# 로컬 개발용 인프라 (MySQL + Redis).
+# 기존 네이티브 MySQL(3306)/redis(6379)와 충돌하지 않도록 포트를 옮겨 노출한다.
+#   docker compose up -d
+#   ./gradlew bootRun --args='--spring.profiles.active=dev'
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: newspin-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: newspin
+      MYSQL_USER: newspin
+      MYSQL_PASSWORD: newspin
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - newspin-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: newspin-redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  newspin-mysql-data:

@@ -10,17 +10,26 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
   data:
     redis:
       host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
-      port: 6379
+      port: ${REDIS_PORT:6379}
 
   jwt:
     secret: ${JWT_SECRET_KEY}
@@ -39,20 +48,32 @@ spring:
           starttls:
             enable: true
 
-
-logging:
-  level:
-    org.hibernate.sql: debug
-
 server:
   url: ${SERVER_URL}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: newspin-be
+
 gemini:
   api-key: ${GEMINI_API_KEY}
-  model: gemini-2.5-flash # 2.0 flash ~> 2.5-flash로 수정
+  model: gemini-2.5-flash
 
 ai-service:
   url: ${AI_SERVICE_URL}
+
+newspin:
+  seed:
+    enabled: false
+    dir: tools/seed/data
 
 ---
 spring:
@@ -60,6 +81,56 @@ spring:
     activate:
       on-profile: local
     import: optional:application-local.yml
+logging:
+  level:
+    org.hibernate.SQL: debug
+
+---
+# docker-compose (docker-compose.yml) 기준 개발 프로필. bootRun/CI 공용.
+#   docker compose up -d
+#   ./gradlew bootRun --args='--spring.profiles.active=dev'
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3307/newspin?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: newspin
+    password: newspin
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      password:
+  jwt:
+    secret: ${JWT_SECRET_KEY:ZGV2LW9ubHktc2VjcmV0LWtleS1uZXdzcGluLWJhY2tlbmQtMzJieXRlcys=}
+  mail:
+    username: ${SPRING_MAIL_USERNAME:dev@example.com}
+    password: ${SPRING_MAIL_PASSWORD:dev}
+
+server:
+  url: ${SERVER_URL:http://localhost:8080}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+gemini:
+  api-key: ${GEMINI_API_KEY:dummy}
+  model: gemini-2.5-flash
+
+ai-service:
+  url: ${AI_SERVICE_URL:http://localhost:8000}
+
+newspin:
+  seed:
+    enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
 ---
 spring:
   config:

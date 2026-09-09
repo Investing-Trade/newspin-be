@@ -97,6 +97,11 @@ public class NewsArticle extends BaseEntity {
 		return this.eventType != null;
 	}
 
+	// 기존 뉴스를 이벤트 뉴스로 지정 (시드 적재 시 사용)
+	public void markAsEvent(EventType eventType) {
+		this.eventType = eventType;
+	}
+
 	// 감성 분석 결과 설정
 	public void updateSentiment(Double sentimentScore, String sentimentReason) {
 		this.sentimentScore = sentimentScore;

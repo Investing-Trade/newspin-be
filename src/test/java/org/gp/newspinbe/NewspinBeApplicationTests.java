@@ -1,9 +1,9 @@
 package org.gp.newspinbe;
 
+import org.gp.newspinbe.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@IntegrationTest
 class NewspinBeApplicationTests {
 
 	@Test
