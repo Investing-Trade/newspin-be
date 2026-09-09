@@ -13,9 +13,8 @@ import org.gp.newspinbe.domain.simulation.dto.response.TradeResponse;
 import org.gp.newspinbe.domain.simulation.repository.PortfolioRepository;
 import org.gp.newspinbe.domain.simulation.repository.SimulationSessionRepository;
 import org.gp.newspinbe.domain.simulation.repository.TradeRepository;
+import org.gp.newspinbe.domain.stock.application.StockPriceResolver;
 import org.gp.newspinbe.domain.stock.domain.Stock;
-import org.gp.newspinbe.domain.stock.domain.StockPrice;
-import org.gp.newspinbe.domain.stock.repository.StockPriceRepository;
 import org.gp.newspinbe.domain.stock.repository.StockRepository;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
@@ -35,7 +34,7 @@ public class TradeService {
     private final TradeRepository tradeRepository;
     private final PortfolioRepository portfolioRepository;
     private final StockRepository stockRepository;
-    private final StockPriceRepository stockPriceRepository;
+    private final StockPriceResolver stockPriceResolver;
 
     @Transactional
     public TradeResponse executeTrade(Long sessionId, Long userId, TradeRequest request) {
@@ -154,12 +153,10 @@ public class TradeService {
         return session;
     }
 
-    // 현재가 조회 (시뮬레이션 날짜 기준 종가)
+    // 현재가 조회 (시뮬레이션 날짜 기준 종가). 조회 가능한 시세가 전혀 없으면 거래 불가.
     private BigDecimal getCurrentPrice(Stock stock, LocalDate simulationDate) {
-    return stockPriceRepository.findByStockAndPriceDate(stock, simulationDate)
-            .or(() -> stockPriceRepository.findFirstByStockAndPriceDateBeforeOrderByPriceDateDesc(stock, simulationDate))
-            .map(StockPrice::getClosePrice)
-            .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TRADE));
+        return stockPriceResolver.resolveCloseAsOf(stock, simulationDate)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TRADE));
     }
 
     /** 클라이언트가 화면에서 본 가격과 서버 시세의 허용 오차 (1%). */

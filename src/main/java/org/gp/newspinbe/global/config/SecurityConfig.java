@@ -1,7 +1,6 @@
 package org.gp.newspinbe.global.config;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +33,9 @@ public class SecurityConfig {
 
 	private final JwtTokenProvider jwtTokenProvider;
 
+	@org.springframework.beans.factory.annotation.Value("${newspin.cors.allowed-origins}")
+	private List<String> allowedOrigins;
+
 	private static final String[] PERMIT_ALL_PATTERNS = {
 		"/user/sign-up",
 		"/user/sign-in",
@@ -42,7 +44,11 @@ public class SecurityConfig {
 		"/swagger-ui/**",
 		"/user/password/**", // 비밀번호 찾기 send-reset-code api 연결 문제 수정
 		"/v3/api-docs/**",
-		"/actuator/**" // 관측성 (S0). 운영에서는 management 포트 분리/망 차단으로 제한 예정 (스테이지 2)
+		// 관측성 — health/prometheus 만 공개. metrics 등 상세 엔드포인트는 인증 필요.
+		// 운영은 management 포트 분리/망 차단 권장 (application-prod.yml.example 참고)
+		"/actuator/health",
+		"/actuator/health/**",
+		"/actuator/prometheus"
 	};
 
 	@Bean
@@ -79,13 +85,8 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
 		corsConfiguration.addAllowedHeader("*");
-		corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
 		corsConfiguration.setAllowCredentials(true);
-		corsConfiguration.setAllowedOrigins(List.of(
-			"http://localhost:5173",
-			"http://127.0.0.1:5173"
-		));
-
+		corsConfiguration.setAllowedOrigins(allowedOrigins); // 프로필별 newspin.cors.allowed-origins
 		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

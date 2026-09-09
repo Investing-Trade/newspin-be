@@ -12,9 +12,8 @@ import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
 import org.gp.newspinbe.domain.simulation.dto.response.PortfolioOverviewResponse;
 import org.gp.newspinbe.domain.simulation.repository.PortfolioRepository;
 import org.gp.newspinbe.domain.simulation.repository.SimulationSessionRepository;
+import org.gp.newspinbe.domain.stock.application.StockPriceResolver;
 import org.gp.newspinbe.domain.stock.domain.Stock;
-import org.gp.newspinbe.domain.stock.domain.StockPrice;
-import org.gp.newspinbe.domain.stock.repository.StockPriceRepository;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ public class PortfolioService {
 
     private final SimulationSessionRepository sessionRepository;
     private final PortfolioRepository portfolioRepository;
-    private final StockPriceRepository stockPriceRepository;
+    private final StockPriceResolver stockPriceResolver;
 
     public PortfolioOverviewResponse getPortfolioOverview(Long sessionId, Long userId) {
         SimulationSession session = getSession(sessionId, userId);
@@ -93,8 +92,6 @@ public class PortfolioService {
     }
 
     private BigDecimal getCurrentPrice(Stock stock, LocalDate date) {
-        return stockPriceRepository.findByStockAndPriceDate(stock, date)
-                .map(StockPrice::getClosePrice)
-                .orElse(BigDecimal.ZERO); // 데이터 없으면 0원 처리
+        return stockPriceResolver.closeForValuation(stock, date);
     }
 }

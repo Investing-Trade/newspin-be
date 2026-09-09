@@ -14,9 +14,8 @@ import org.gp.newspinbe.domain.simulation.dto.response.DayResponse;
 import org.gp.newspinbe.domain.simulation.repository.AssetHistoryRepository;
 import org.gp.newspinbe.domain.simulation.repository.PortfolioRepository;
 import org.gp.newspinbe.domain.simulation.repository.SimulationSessionRepository;
+import org.gp.newspinbe.domain.stock.application.StockPriceResolver;
 import org.gp.newspinbe.domain.stock.domain.Stock;
-import org.gp.newspinbe.domain.stock.domain.StockPrice;
-import org.gp.newspinbe.domain.stock.repository.StockPriceRepository;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class NextDayService {
     private final SimulationSessionRepository sessionRepository;
     private final AssetHistoryRepository assetHistoryRepository;
     private final PortfolioRepository portfolioRepository;
-    private final StockPriceRepository stockPriceRepository;
+    private final StockPriceResolver stockPriceResolver;
     private final NewsArticleRepository newsRepository;
 
     // 현재 날짜의 데이터 조회 (저장 없음)
@@ -117,9 +116,7 @@ public class NextDayService {
 
         for (Portfolio portfolio : portfolios) {
             Stock stock = portfolio.getStock();
-            BigDecimal closePrice = stockPriceRepository.findByStockAndPriceDate(stock, date)
-                    .map(StockPrice::getClosePrice)
-                    .orElse(BigDecimal.ZERO);
+            BigDecimal closePrice = stockPriceResolver.closeForValuation(stock, date);
 
             totalStockValue = totalStockValue.add(
                     closePrice.multiply(BigDecimal.valueOf(portfolio.getQuantity())));
