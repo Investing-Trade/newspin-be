@@ -1,5 +1,6 @@
 package org.gp.newspinbe.global.security.jwt;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.DigestUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -68,8 +70,10 @@ public class JwtTokenProvider {
 		Date refreshTokenExpire = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
 		String refreshToken = generateRefreshToken(username, refreshTokenExpire);
 
-		// Redis에 RefreshToken 넣기
-		redisUtil.setDataExpire(username, refreshToken, REFRESH_TOKEN_EXPIRE_TIME);
+		// Redis 에 RefreshToken 저장. 기기별로 다른 키를 써서 멀티 디바이스 로그인 지원 (I-7).
+		// (기존엔 email 단일 키라 나중 로그인이 이전 토큰을 덮어썼고, TTL 도 ms 를 s 로 잘못 넘겨 사실상 무기한)
+		redisUtil.setDataExpire(refreshKey(username, refreshToken), refreshToken,
+				REFRESH_TOKEN_EXPIRE_TIME / 1000);
 
 		return JwtToken.builder()
 				.grantType(GRANT_TYPE)
@@ -89,7 +93,9 @@ public class JwtTokenProvider {
 
 	private String generateRefreshToken(String username, Date expireDate) {
 		return Jwts.builder()
+				.setId(java.util.UUID.randomUUID().toString()) // jti — 같은 ms 에 발급돼도 토큰이 유일하도록
 				.setSubject(username)
+				.setIssuedAt(new Date())
 				.setExpiration(expireDate)
 				.signWith(key, SignatureAlgorithm.HS256)
 				.compact();
@@ -149,7 +155,7 @@ public class JwtTokenProvider {
 
 		try {
 			String username = getUserNameFromToken(token);
-			String redisToken = redisUtil.getData(username);
+			String redisToken = redisUtil.getData(refreshKey(username, token));
 			return token.equals(redisToken);
 		} catch (Exception e) {
 			log.info("RefreshToken Validation Failed", e);
@@ -171,12 +177,29 @@ public class JwtTokenProvider {
 		}
 	}
 
+	/** 리프레시(토큰 회전) 시 사용한 이전 리프레시 토큰만 무효화. */
+	public void invalidateRefreshToken(String token) {
+		try {
+			redisUtil.deleteData(refreshKey(getUserNameFromToken(token), token));
+		} catch (Exception e) {
+			log.info("이전 RefreshToken 무효화 실패 (무시)", e);
+		}
+	}
+
+	/** 로그아웃 — 해당 유저의 모든 기기 리프레시 토큰 무효화. */
 	public void deleteRefreshToken(String username) {
 		if (username == null || username.trim().isEmpty()) {
 			throw new IllegalArgumentException("Username cannot be null or empty");
 		}
+		redisUtil.deleteByPattern(refreshKeyPrefix(username) + "*");
+	}
 
-		redisUtil.deleteData(username);
+	private static String refreshKeyPrefix(String username) {
+		return "refresh:" + username + ":";
+	}
+
+	private static String refreshKey(String username, String token) {
+		return refreshKeyPrefix(username) + DigestUtils.md5DigestAsHex(token.getBytes(StandardCharsets.UTF_8));
 	}
 
 }

@@ -1,39 +1,23 @@
 package org.gp.newspinbe.global.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * {@code RedisConnectionFactory} 는 Spring Boot 오토컨피그({@code spring.data.redis.*}) 에 맡긴다 (I-18).
+ * 이전엔 여기서 {@code @Value} 로 팩토리를 직접 만들어 오토컨피그·{@code @ServiceConnection}·health 를
+ * 우회하고, 기본값이 없어 환경변수 미설정 시 컨텍스트 로드가 실패했다.
+ */
 @Configuration
 public class RedisConfig {
 
-	@Value("${spring.data.redis.host}")
-	private String host;
-
-	@Value("${spring.data.redis.port}")
-	private int port;
-
-	@Value("${spring.data.redis.password}")
-	private String password;
-
 	@Bean
-	public RedisConnectionFactory redisConnectionFactory() {
-		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
-		redisStandaloneConfiguration.setHostName(host);
-		redisStandaloneConfiguration.setPort(port);
-		redisStandaloneConfiguration.setPassword(password);
-		return new LettuceConnectionFactory(redisStandaloneConfiguration);
-	}
-
-	@Bean
-	public RedisTemplate<String, Object> redisTemplate() {
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(redisConnectionFactory());
+		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new StringRedisSerializer());
 		return template;

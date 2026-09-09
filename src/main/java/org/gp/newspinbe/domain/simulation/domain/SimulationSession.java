@@ -75,22 +75,7 @@ public class SimulationSession extends BaseEntity {
         return new SimulationSession(user, initialCapital, startDate, endDate);
     }
 
-    // 다음 날로 진행
-    public void advanceDay() {
-        if (isCompleted()) {
-            throw new IllegalStateException("이미 완료된 세션입니다.");
-        }
-        if (currentSimulationDate.isAfter(endDate) || currentSimulationDate.isEqual(endDate)) {
-            complete();
-        } else {
-            this.currentSimulationDate = currentSimulationDate.plusDays(1);
-            if (currentSimulationDate.isAfter(endDate)) {
-                complete();
-            }
-        }
-    }
-
-    // 특정 날짜로 업데이트 (주말 건너뛰기 등)
+    // 특정 날짜로 업데이트 (주말 건너뛰기 등). 실제 "다음 날 진행" 로직은 NextDayService 가 담당.
     public void updateCurrentSimulationDate(LocalDate nextDate) {
         if (nextDate.isBefore(this.currentSimulationDate)) {
             throw new IllegalArgumentException("과거 날짜로 돌아갈 수 없습니다.");
@@ -117,20 +102,6 @@ public class SimulationSession extends BaseEntity {
 
     public void abandon() {
         this.status = SessionStatus.ABANDONED;
-    }
-
-    public void reset() {
-        this.currentCapital = initialCapital;
-        this.currentSimulationDate = startDate;
-        this.status = SessionStatus.ACTIVE;
-    }
-
-    public boolean isActive() {
-        return status == SessionStatus.ACTIVE;
-    }
-
-    public boolean isCompleted() {
-        return status == SessionStatus.COMPLETED;
     }
 
     private static void validateDates(LocalDate startDate, LocalDate endDate) {

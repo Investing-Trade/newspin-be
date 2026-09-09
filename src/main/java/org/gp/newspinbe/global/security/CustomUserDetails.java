@@ -21,7 +21,8 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Collections.singletonList(new SimpleGrantedAuthority("USER"));
+		// Spring Security 의 hasRole()/hasAuthority() 규약에 맞게 ROLE_ 접두사를 붙인다 (I-6).
+		return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 
 	@Override
