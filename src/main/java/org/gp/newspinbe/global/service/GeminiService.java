@@ -36,11 +36,34 @@ public class GeminiService {
     private final RestClient geminiRestClient;
     private final RestClientConfig restClientConfig;
 
+    private static final Map<String, Object> FREE_TEXT_CONFIG =
+            Map.of("temperature", 0.7, "maxOutputTokens", 4096);
+
+    /** 자유 텍스트 생성 (튜터 피드백 등). */
     public String generateContent(String prompt) {
+        return generate(prompt, FREE_TEXT_CONFIG);
+    }
+
+    /**
+     * JSON 응답 강제 (I-4). {@code responseMimeType=application/json} + 스키마.
+     * 반환값이 유효한 JSON 이 아니면(fallback 메시지 등) 호출자가 처리한다.
+     */
+    public String generateJson(String prompt, Map<String, Object> responseSchema) {
+        Map<String, Object> config = new java.util.HashMap<>();
+        config.put("temperature", 0.2);
+        config.put("maxOutputTokens", 8192);
+        config.put("responseMimeType", "application/json");
+        if (responseSchema != null) {
+            config.put("responseSchema", responseSchema);
+        }
+        return generate(prompt, config);
+    }
+
+    private String generate(String prompt, Map<String, Object> generationConfig) {
         RuntimeException last = null;
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             try {
-                Map<?, ?> response = call(prompt);
+                Map<?, ?> response = call(prompt, generationConfig);
                 return parseText(response); // 파싱 실패/차단은 GeminiUnavailableException 로 던짐 (재시도 안 함)
             } catch (GeminiBlockedException e) {
                 log.warn("Gemini 응답 차단 - finishReason: {}", e.getMessage());
@@ -64,10 +87,10 @@ public class GeminiService {
         return FALLBACK_ERROR;
     }
 
-    private Map<?, ?> call(String prompt) {
+    private Map<?, ?> call(String prompt, Map<String, Object> generationConfig) {
         Map<String, Object> body = Map.of(
                 "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
-                "generationConfig", Map.of("temperature", 0.7, "maxOutputTokens", 4096));
+                "generationConfig", generationConfig);
 
         return geminiRestClient.post()
                 .uri(b -> b.path(":generateContent")
