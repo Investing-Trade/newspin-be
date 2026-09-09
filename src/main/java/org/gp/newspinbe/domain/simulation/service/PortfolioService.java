@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.gp.newspinbe.domain.simulation.domain.Portfolio;
 import org.gp.newspinbe.domain.simulation.domain.SessionStatus;
@@ -13,7 +14,6 @@ import org.gp.newspinbe.domain.simulation.dto.response.PortfolioOverviewResponse
 import org.gp.newspinbe.domain.simulation.repository.PortfolioRepository;
 import org.gp.newspinbe.domain.simulation.repository.SimulationSessionRepository;
 import org.gp.newspinbe.domain.stock.application.StockPriceResolver;
-import org.gp.newspinbe.domain.stock.domain.Stock;
 import org.gp.newspinbe.global.exception.CustomException;
 import org.gp.newspinbe.global.exception.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -43,12 +43,16 @@ public class PortfolioService {
 
         LocalDate currentDate = session.getCurrentSimulationDate();
 
-        // 각 종목별 현재가 조회 및 계산
+        // 보유 종목 현재가를 한 번에 조회 (I-2)
+        Map<Long, BigDecimal> currentPrices = stockPriceResolver.closesForValuation(
+                portfolios.stream().map(Portfolio::getStock).toList(), currentDate);
+
         for (Portfolio portfolio : portfolios) {
             if (portfolio.getQuantity() <= 0)
                 continue; // 수량 0인 것은 제외
 
-            BigDecimal currentPrice = getCurrentPrice(portfolio.getStock(), currentDate);
+            BigDecimal currentPrice = currentPrices.getOrDefault(
+                    portfolio.getStock().getStockId(), BigDecimal.ZERO);
 
             PortfolioOverviewResponse.PortfolioItemResponse item = PortfolioOverviewResponse.PortfolioItemResponse
                     .of(portfolio, currentPrice);
@@ -89,9 +93,5 @@ public class PortfolioService {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
         return session;
-    }
-
-    private BigDecimal getCurrentPrice(Stock stock, LocalDate date) {
-        return stockPriceResolver.closeForValuation(stock, date);
     }
 }
