@@ -30,13 +30,13 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 
 | 순서 | 항목 | 이슈 | 분류 | 상태 | 문서 · PR |
 | --- | --- | --- | --- | --- | --- |
-| S0 | 개선 작업 기반 세팅 (빌드 툴체인·docs) | I-15 | 인프라 | 🚧 | [00-setup](improvements/00-project-setup.md) |
-| S0 | docker-compose + application-local.example | - | 인프라 | ⬜ | - |
-| S0 | Flyway 도입 + 시드 데이터 이관 | C-2 | 인프라 | ⬜ | - |
-| S0 | Testcontainers 통합테스트 골격 + 핵심 특성화 테스트 | I-13 | 인프라 | ⬜ | - |
-| S0 | 관측성 (Actuator·Micrometer·traceId·구조화 로깅) | I-12 | 인프라 | ⬜ | - |
-| S0 | k6 부하 스크립트 + 기준선 측정 | - | 인프라 | ⬜ | - |
-| S0 | GitHub Actions CI (build + test) | I-14 | 인프라 | ⬜ | - |
+| S0 | 빌드 툴체인·docs 체계 | I-15 | 인프라 | ✅ | [00-setup](improvements/00-project-setup.md) |
+| S0 | docker-compose + dev 프로필 + application-local.example | - | 인프라 | ✅ | [S0](improvements/S0-groundwork.md) |
+| S0 | Flyway baseline + 시드 데이터 이관 (SeedRunner) | C-2 | 인프라 | ✅ | [S0](improvements/S0-groundwork.md) |
+| S0 | Testcontainers 통합테스트 + lookahead 특성화 테스트 | I-13 | 인프라 | ✅ (CI 검증) | [S0](improvements/S0-groundwork.md) |
+| S0 | 관측성 (Actuator·Micrometer·traceId·구조화 로깅) | I-12 | 인프라 | ✅ | [S0](improvements/S0-groundwork.md) |
+| S0 | k6 부하 스크립트 (기준선 수치는 각 성능 항목에서) | - | 인프라 | ✅ | [k6](benchmarks/k6/) |
+| S0 | GitHub Actions CI (build + test) | I-14 | 인프라 | ✅ | [ci.yml](../.github/workflows/ci.yml) |
 | 1 | AIService 하드코딩 테스트 호출 제거 | C-1 | 심각 | ⬜ | - |
 | 2 | 로컬 원큐 실행 + 시드 데이터 검증 | C-2 | 심각 | ⬜ | - |
 | 3 | 미래 시세 유출 차단 (lookahead) | C-5, S-1 | 심각 | ⬜ | - |
