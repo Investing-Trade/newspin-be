@@ -43,15 +43,35 @@
 (진행하며 채움 — 커밋 단위로)
 
 - [x] `chore`: foojay 툴체인, docs 체계 — [#00](00-project-setup.md)
-- [ ] `chore`: 시드 원본 편입 + `fetch_prices.py`
-- [ ] `feat`: 이벤트 10건 작성 (`events.json`)
-- [ ] `feat`: Flyway + baseline 스키마
-- [ ] `feat`: `SeedRunner` (프로필 게이트, 멱등)
-- [ ] `chore`: docker-compose + application-local.yml.example
-- [ ] `feat`: 관측성 (Actuator/Micrometer/MDC)
-- [ ] `test`: Testcontainers 베이스 + 특성화 테스트 2건
-- [ ] `test`: k6 스크립트 + 기준선 측정
-- [ ] `ci`: GitHub Actions
+- [x] `chore`: 시드 원본 편입 + `fetch_prices.py` (네이버 금융, 2020 Q1 일봉 1,240행)
+- [x] `feat`: 이벤트 10건 작성 — `build_events.py`, impactRate 를 실제 시세에서 파생
+- [x] `feat`: Flyway `spring-boot-starter-flyway` + `V1__baseline.sql` (Hibernate schema-gen → 제약 이름 안정화)
+- [x] `feat`: `SeedRunner` (`@Profile(local,dev)` + `newspin.seed.enabled`, 빈 DB 1회)
+- [x] `chore`: docker-compose(mysql:8.4/redis:7.4, 3307/6380) + `application-local.yml.example` + `dev` 프로필
+- [x] `feat`: 관측성 — Actuator/Micrometer/prometheus, `MdcTraceFilter`(X-Trace-Id), logback JSON(prod)
+- [x] `feat`: `SecurityConfig` `/actuator/**` permit (운영은 스테이지 2에서 제한)
+- [x] `test`: Testcontainers 베이스(`@IntegrationTest`) + 시드 검증 + lookahead 특성화 테스트
+- [x] `test`: k6 스크립트 3종 (`docs/benchmarks/k6/`) — 기준선 수치는 각 성능 항목 착수 시 측정
+- [x] `ci`: GitHub Actions (build + test)
+
+### 검증 로그 (2026-09-09)
+
+- `docker compose up` → `bootRun --spring.profiles.active=dev`: Flyway `V1__baseline` 적용,
+  `ddl-auto: validate` 통과, SeedRunner 적재 확인 —
+  `stock 20 / news_article 2528 / news_stock 2528 / stock_price 1240 / event_stock_impact 107 / 이벤트 뉴스 10`
+- `MdcTraceFilter`: 응답 `X-Trace-Id` 헤더 확인
+- Flyway 배선 이슈: SB4 는 autoconfig 가 모듈 분리됨 → raw `flyway-core` 로는 마이그레이션이 안 돌고
+  `spring-boot-starter-flyway` (→ `spring-boot-flyway`) 가 필요. `flyway-mysql` 은 11.x 에서도 유효.
+- Testcontainers on Windows: 최신 Docker Desktop(엔진 API 1.53)에서 docker-java(TC 1.21.3 번들)가
+  named pipe 로 버전 협상 실패 → HTTP 400. `DOCKER_HOST=tcp://localhost:2375` (Docker Desktop 에서
+  TCP 데몬 노출) 로 우회. **CI(ubuntu, unix 소켓)에서는 정상 동작** — 통합 테스트 1차 검증처는 CI.
+  스키마/시드 정확성은 `bootRun --spring.profiles.active=dev` 로도 검증됨(위 로그).
+
+### 로컬 미해결 (CI 에서 검증)
+
+- 통합 테스트 3건(`NewspinBeApplicationTests`, `SeedDataIntegrationTest`, `StockServiceLookaheadCharacterizationTest`)은
+  이 개발 머신의 Docker Desktop named-pipe 이슈로 로컬 실행 불가. 코드는 컴파일되고 CI(GitHub Actions)에서 실행됨.
+  로컬에서 돌리려면 위 TCP 우회 필요.
 
 ## ⑤ 검증
 

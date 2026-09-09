@@ -41,7 +41,8 @@ public class SecurityConfig {
 		"/user/email/**",
 		"/swagger-ui/**",
 		"/user/password/**", // 비밀번호 찾기 send-reset-code api 연결 문제 수정
-		"/v3/api-docs/**"
+		"/v3/api-docs/**",
+		"/actuator/**" // 관측성 (S0). 운영에서는 management 포트 분리/망 차단으로 제한 예정 (스테이지 2)
 	};
 
 	@Bean
