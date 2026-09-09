@@ -2,6 +2,7 @@ package org.gp.newspinbe.global.exception;
 
 
 import org.gp.newspinbe.global.common.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -36,6 +37,13 @@ public class GlobalExceptionHandler {
 		log.warn("HTTP method not supported: {}", e.getMethod());
 		return ResponseEntity.status(errorCode.getStatus())
 			.body(ApiResponse.error(errorCode.getCode(), "지원하지 않는 HTTP 메소드입니다: " + e.getMethod()));
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+		log.warn("Data integrity violation (동시 요청 등): {}", e.getMostSpecificCause().getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+			.body(ApiResponse.error("C409", "이미 처리 중이거나 처리된 요청입니다. 잠시 후 다시 시도해주세요."));
 	}
 
 	@ExceptionHandler(CustomException.class)

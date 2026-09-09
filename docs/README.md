@@ -42,10 +42,10 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 3 | 미래 시세 유출 차단 (lookahead) | C-5, S-1 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
 | 4 | 모의투자 가격 검증 재설계 | C-3 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
 | 5 | GeminiService 응답 파싱 방어 + 재시도 | C-4 | 심각 | ✅ | [S1](improvements/S1-critical.md) |
-| 6 | 트랜잭션 경계 분리 (외부 호출 축출) | R-1 | 위험 | ⬜ | - |
-| 7 | AI 연동 회복탄력성 (Resilience4j) | R-2 | 위험 | ⬜ | - |
-| 8 | AssetHistory 동시성 처리 | R-3 | 위험 | ⬜ | - |
-| 9 | 세션 거래 동시성 (잔고 lost update) | R-4 | 위험 | ⬜ | - |
+| 6 | 트랜잭션 경계 분리 (외부 호출 축출) | R-1 | 위험 | ✅ | [S2-A](improvements/S2-resilience.md) |
+| 7 | AI 연동 회복탄력성 (Resilience4j) | R-2 | 위험 | ✅ | [S2-A](improvements/S2-resilience.md) |
+| 8 | AssetHistory 동시성 처리 | R-3 | 위험 | ✅ | [S2-B](improvements/S2-concurrency.md) |
+| 9 | 세션 거래 동시성 (잔고 lost update) | R-4 | 위험 | ✅ | [S2-B](improvements/S2-concurrency.md) |
 | 10 | 시세 결측 조용한 0 처리 → 관측 가능화 | R-5 | 위험 | ⬜ | - |
 | 11 | 프로필/보안 설정 분리 (CORS·ddl-auto·로깅) | R-6, I-8 | 위험 | ⬜ | - |
 | 12 | 뉴스 랜덤 조회 쿼리 최적화 | I-1 | 개선 | ⬜ | - |
