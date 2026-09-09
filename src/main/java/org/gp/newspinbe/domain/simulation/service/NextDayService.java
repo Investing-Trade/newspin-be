@@ -67,7 +67,8 @@ public class NextDayService {
 
     @Transactional
     public DayResponse proceedToNextDay(Long sessionId, Long userId) {
-        SimulationSession session = getSession(sessionId, userId);
+        // 같은 세션의 동시 진행을 직렬화 (R-3: AssetHistory 유니크 위반 방지)
+        SimulationSession session = getSessionForUpdate(sessionId, userId);
 
         // 0. 진행 전(어제) 자산 데이터 확보
         AssetHistory yesterdayHistory = assetHistoryRepository
@@ -134,7 +135,15 @@ public class NextDayService {
     }
 
     private SimulationSession getSession(Long sessionId, Long userId) {
-        SimulationSession session = sessionRepository.findById(sessionId)
+        return validateOwner(sessionRepository.findById(sessionId), userId);
+    }
+
+    private SimulationSession getSessionForUpdate(Long sessionId, Long userId) {
+        return validateOwner(sessionRepository.findByIdForUpdate(sessionId), userId);
+    }
+
+    private SimulationSession validateOwner(java.util.Optional<SimulationSession> found, Long userId) {
+        SimulationSession session = found
                 .orElseThrow(() -> new CustomException(ErrorCode.SESSION_NOT_FOUND));
 
         if (!session.getUser().getUserId().equals(userId)) {

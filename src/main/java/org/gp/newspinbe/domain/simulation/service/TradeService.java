@@ -42,7 +42,8 @@ public class TradeService {
         log.info("거래 요청 - session: {}, stock: {}, type: {}", sessionId, request.getStockCode(),
                 request.getTradeType());
 
-        SimulationSession session = getSession(sessionId, userId);
+        // 같은 세션의 동시 거래를 직렬화 (R-4: 잔고 lost update 방지)
+        SimulationSession session = getSessionForUpdate(sessionId, userId);
 
         Stock stock = stockRepository.findByStockCode(request.getStockCode())
                 .orElseThrow(() -> new CustomException(ErrorCode.STOCK_NOT_FOUND));
@@ -131,7 +132,15 @@ public class TradeService {
     }
 
     private SimulationSession getSession(Long sessionId, Long userId) {
-        SimulationSession session = sessionRepository.findById(sessionId)
+        return validate(sessionRepository.findById(sessionId), userId);
+    }
+
+    private SimulationSession getSessionForUpdate(Long sessionId, Long userId) {
+        return validate(sessionRepository.findByIdForUpdate(sessionId), userId);
+    }
+
+    private SimulationSession validate(java.util.Optional<SimulationSession> found, Long userId) {
+        SimulationSession session = found
                 .orElseThrow(() -> new CustomException(ErrorCode.SESSION_NOT_FOUND));
 
         if (!session.getUser().getUserId().equals(userId)) {
