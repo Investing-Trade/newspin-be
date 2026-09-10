@@ -23,7 +23,10 @@ public class InvestmentReportResponse {
     private long buyCount; // 매수 횟수
     private long sellCount; // 매도 횟수
 
-    // AI 분석 결과
+    // AI 분석 상태 — GENERATING / READY / FAILED (I-11: 비동기 생성)
+    private String status;
+
+    // AI 분석 결과 (status=READY 일 때만 채워짐)
     private String overallAnalysis; // 종합 분석
     private String newsResponseAnalysis; // 뉴스 대응 분석
     private String riskManagementAnalysis; // 리스크 관리 분석

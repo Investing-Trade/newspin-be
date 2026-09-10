@@ -21,12 +21,16 @@ public class InvestmentReportController {
     private final InvestmentReportService reportService;
 
     @GetMapping("/{sessionId}/report")
-    public ResponseEntity<ApiResponse<InvestmentReportResponse>> generateReport(
+    public ResponseEntity<ApiResponse<InvestmentReportResponse>> getReport(
             @PathVariable Long sessionId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        InvestmentReportResponse response = reportService.generateReport(
+        InvestmentReportResponse response = reportService.getReport(
                 sessionId,
                 userDetails.getUser().getUserId());
-        return ResponseEntity.ok(ApiResponse.success(response));
+        // AI 분석이 아직이면 202, 완료면 200 (FE 는 status 필드로 폴링)
+        var status = "READY".equals(response.getStatus())
+                ? org.springframework.http.HttpStatus.OK
+                : org.springframework.http.HttpStatus.ACCEPTED;
+        return ResponseEntity.status(status).body(ApiResponse.success(response));
     }
 }

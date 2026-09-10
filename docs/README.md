@@ -57,7 +57,7 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 18 | Redis refresh token 키 (멀티 디바이스) | I-7 | 개선 | ✅ | [S3](improvements/S3-roles-refresh-cleanup.md) |
 | 19 | SimulationSession 데드코드 정리·로직 일원화 | I-9 | 개선 | ✅ | [S3](improvements/S3-roles-refresh-cleanup.md) |
 | 20 | 목록 API 페이지네이션 | I-10 | 개선 | ✅ | [S3](improvements/S3-list-pagination.md) |
-| 21 | 리포트 생성 비동기화 | I-11 | 개선 | ⬜ | - |
+| 21 | 리포트 생성 비동기화 | I-11 | 개선 | ✅ | [S3](improvements/S3-report-async.md) |
 | 22 | 학습-평가 사일로 완화 | S-2 | 개선 | ⬜ | - |
 
 상태 범례: ⬜ 대기 · 🚧 진행 중 · ✅ 완료 · ⏸ 보류
