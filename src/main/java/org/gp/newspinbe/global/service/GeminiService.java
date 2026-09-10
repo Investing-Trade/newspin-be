@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.gp.newspinbe.global.config.RestClientConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -23,8 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GeminiService {
 
-    private static final int MAX_ATTEMPTS = 3;
-    private static final long[] BACKOFF_MS = {0L, 500L, 1500L};
+    private static final int MAX_ATTEMPTS = 4;
+    private static final long[] BACKOFF_MS = {0L, 600L, 1500L, 3000L};
 
     /** text 없이 생성이 끝난 경우의 사유들 — 재시도해도 동일하므로 즉시 fallback. */
     private static final Set<String> BLOCKED_REASONS =
@@ -87,18 +89,37 @@ public class GeminiService {
         return FALLBACK_ERROR;
     }
 
+    private final ObjectMapper json = new ObjectMapper();
+
     private Map<?, ?> call(String prompt, Map<String, Object> generationConfig) {
         Map<String, Object> body = Map.of(
                 "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
                 "generationConfig", generationConfig);
 
+        // exchange 로 원본 바이트를 직접 읽어 파싱 — Gemini 가 가끔 application/octet-stream 으로
+        // 응답해 RestClient 메시지 컨버터가 String/Map 변환을 거부하는 경우 회피.
         return geminiRestClient.post()
                 .uri(b -> b.path(":generateContent")
                         .queryParam("key", restClientConfig.getGeminiApiKey())
                         .build())
                 .body(body)
-                .retrieve()
-                .body(Map.class);
+                .exchange((request, response) -> {
+                    byte[] bytes = response.getBody().readAllBytes();
+                    if (response.getStatusCode().isError()) {
+                        throw new RestClientResponseException(
+                                "Gemini " + response.getStatusCode().value(),
+                                response.getStatusCode(),
+                                response.getStatusText(),
+                                response.getHeaders(),
+                                bytes,
+                                java.nio.charset.StandardCharsets.UTF_8);
+                    }
+                    try {
+                        return json.readValue(bytes, Map.class);
+                    } catch (Exception e) {
+                        throw new GeminiUnavailableException("응답 JSON 파싱 실패: " + e.getMessage());
+                    }
+                });
     }
 
     static String parseText(Map<?, ?> response) {
