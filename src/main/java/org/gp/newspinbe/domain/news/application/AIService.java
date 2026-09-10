@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>트랜잭션을 열지 않는다 (R-1). 뉴스 로딩은 리포지토리가 자체 트랜잭션으로 처리하고,
  * 외부 호출(newspin-ai, Gemini)은 트랜잭션 밖에서 실행해 DB 커넥션을 점유하지 않는다.
- * 학습 완료 기록만 {@link NewsService#markNewsAsLearned} 의 트랜잭션으로 커밋한다.
+ * 학습 완료 + 감성 판단 기록만 {@link NewsService#recordNewsJudgment} 의 트랜잭션으로 커밋한다.
  */
 @Service
 @RequiredArgsConstructor
@@ -49,7 +49,7 @@ public class AIService {
 
         String feedback = geminiService.generateContent(buildPrompt(newsArticle, summary, aiAnalysisRequest, isCorrect));
 
-        newsService.markNewsAsLearned(userId, newsId);
+        newsService.recordNewsJudgment(userId, newsId, aiAnalysisRequest.getSentiment(), aiSentiment);
 
         return AIAnalysisResponse.builder()
                 .aiSentiment(aiSentiment)

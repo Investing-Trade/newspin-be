@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * R-1 / R-2. AI 서버(newspin-ai)가 죽어도:
  *  - LazyInitializationException 없이 (relatedStocks fetch-join)
  *  - 명시적 예외로 실패하고
- *  - 학습 완료로 기록되지 않는다 (markNewsAsLearned 이전에 실패).
+ *  - 학습 완료로 기록되지 않는다 (recordNewsJudgment 이전에 실패).
  * 테스트 프로필의 ai-service.url 은 즉시 연결 거부되는 주소.
  */
 @IntegrationTest
