@@ -7,6 +7,9 @@ import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
 import org.gp.newspinbe.domain.simulation.domain.Trade;
 import org.gp.newspinbe.domain.simulation.domain.TradeType;
 import org.gp.newspinbe.domain.stock.domain.Stock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +19,10 @@ import org.springframework.stereotype.Repository;
 public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     List<Trade> findBySessionOrderByCreatedAtAsc(SimulationSession session);
+
+    /** 거래 내역 페이지 조회 (I-10). stock 을 함께 로딩해 매핑 시 N+1 방지. */
+    @EntityGraph(attributePaths = "stock")
+    Page<Trade> findBySession(SimulationSession session, Pageable pageable);
 
     @Query("SELECT t FROM Trade t JOIN FETCH t.stock " +
             "WHERE t.session = :session AND t.tradeDate = :tradeDate " +

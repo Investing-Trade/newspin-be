@@ -1,12 +1,14 @@
 package org.gp.newspinbe.domain.simulation.controller;
 
-import java.util.List;
-
 import org.gp.newspinbe.domain.simulation.dto.request.TradeRequest;
 import org.gp.newspinbe.domain.simulation.dto.response.TradeResponse;
 import org.gp.newspinbe.domain.simulation.service.TradeService;
 import org.gp.newspinbe.global.common.ApiResponse;
+import org.gp.newspinbe.global.common.PageResponse;
 import org.gp.newspinbe.global.security.CustomUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,12 +46,12 @@ public class TradeController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TradeResponse>>> getTradeHistory(
+    public ResponseEntity<ApiResponse<PageResponse<TradeResponse>>> getTradeHistory(
             @PathVariable Long sessionId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<TradeResponse> response = tradeService.getTradeHistory(
-                sessionId,
-                userDetails.getUser().getUserId());
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PageResponse<TradeResponse> response = PageResponse.from(
+                tradeService.getTradeHistory(sessionId, userDetails.getUser().getUserId(), pageable));
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

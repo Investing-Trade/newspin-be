@@ -27,6 +27,9 @@ public interface SimulationSessionRepository extends JpaRepository<SimulationSes
 
     List<SimulationSession> findByUserOrderByCreatedAtDesc(User user);
 
+    org.springframework.data.domain.Page<SimulationSession> findByUser(
+            User user, org.springframework.data.domain.Pageable pageable);
+
     List<SimulationSession> findByUserAndStatus(User user, SessionStatus status);
 
     @Query("SELECT s FROM SimulationSession s WHERE s.user = :user AND s.status = 'ACTIVE'")

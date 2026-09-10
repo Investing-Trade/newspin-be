@@ -120,14 +120,12 @@ public class TradeService {
         return tradeRepository.save(trade);
     }
 
-    // 거래 내역 조회
-    public java.util.List<TradeResponse> getTradeHistory(Long sessionId, Long userId) {
+    // 거래 내역 조회 (페이지네이션 — I-10)
+    public org.springframework.data.domain.Page<TradeResponse> getTradeHistory(
+            Long sessionId, Long userId, org.springframework.data.domain.Pageable pageable) {
         SimulationSession session = getSession(sessionId, userId);
-
-        return tradeRepository.findBySessionOrderByCreatedAtAsc(session)
-                .stream()
-                .map(trade -> TradeResponse.from(trade, null)) // 조회 시 잔고는 null
-                .collect(java.util.stream.Collectors.toList());
+        return tradeRepository.findBySession(session, pageable)
+                .map(trade -> TradeResponse.from(trade, null)); // 조회 시 잔고는 null
     }
 
     private SimulationSession getSession(Long sessionId, Long userId) {
