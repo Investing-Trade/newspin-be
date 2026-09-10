@@ -3,6 +3,7 @@ package org.gp.newspinbe.domain.news.application;
 import java.util.Random;
 
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
+import org.gp.newspinbe.domain.news.domain.NewsSentiment;
 import org.gp.newspinbe.domain.news.domain.UserNewsProgress;
 import org.gp.newspinbe.domain.news.dto.response.NewsResponse;
 import org.gp.newspinbe.domain.news.repository.NewsArticleRepository;
@@ -54,20 +55,28 @@ public class NewsService {
         return NewsResponse.from(selected);
     }
 
+    /**
+     * 뉴스 학습 완료 + 감성 판단 결과 기록 (S-2).
+     * 이미 학습한 뉴스면 최신 판단으로 갱신하고, 아니면 새로 만든다.
+     */
     @Transactional
-    public void markNewsAsLearned(Long userId, Long newsId) {
-        if (userNewsProgressRepository.existsByUser_UserIdAndNewsArticle_NewsId(userId, newsId)) {
+    public void recordNewsJudgment(Long userId, Long newsId,
+            NewsSentiment userSentiment, NewsSentiment aiSentiment) {
+        UserNewsProgress existing = userNewsProgressRepository
+                .findByUser_UserIdAndNewsArticle_NewsId(userId, newsId)
+                .orElse(null);
+        if (existing != null) {
+            existing.recordJudgment(userSentiment, aiSentiment);
             return;
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         NewsArticle newsArticle = newsArticleRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NEWS_NOT_FOUND));
 
-        UserNewsProgress progress = UserNewsProgress.createUserNewsProgress(user, newsArticle);
-        userNewsProgressRepository.save(progress);
+        userNewsProgressRepository.save(
+                UserNewsProgress.withJudgment(user, newsArticle, userSentiment, aiSentiment));
     }
 
     @Transactional

@@ -10,7 +10,10 @@ import org.gp.newspinbe.domain.ai.report.repository.InvestmentReportRepository;
 import org.gp.newspinbe.domain.event.domain.EventStockImpact;
 import org.gp.newspinbe.domain.event.repository.EventStockImpactRepository;
 import org.gp.newspinbe.domain.news.domain.NewsArticle;
+import org.gp.newspinbe.domain.news.domain.NewsSentiment;
+import org.gp.newspinbe.domain.news.domain.UserNewsProgress;
 import org.gp.newspinbe.domain.news.repository.NewsArticleRepository;
+import org.gp.newspinbe.domain.news.repository.UserNewsProgressRepository;
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
 import org.gp.newspinbe.domain.simulation.domain.Trade;
@@ -44,6 +47,7 @@ public class ReportGenerator {
     private final AssetHistoryRepository assetHistoryRepository;
     private final NewsArticleRepository newsArticleRepository;
     private final EventStockImpactRepository eventStockImpactRepository;
+    private final UserNewsProgressRepository userNewsProgressRepository;
     private final GeminiService geminiService;
     /** 자기 자신 프록시 — {@code generateAsync} 에서 {@code generate} 의 @Transactional 경계를 살리기 위해. */
     private final ObjectProvider<ReportGenerator> self;
@@ -187,12 +191,58 @@ public class ReportGenerator {
         }
         sb.append("\n");
 
+        appendJudgmentAccuracy(sb, session);
+
         sb.append("== 분석 요청 ==\n");
         sb.append("위 데이터를 바탕으로 아래 4개 항목을 한국어로 분석해 JSON 객체로만 응답하세요.\n");
         sb.append("- overallAnalysis: 전체적인 투자 성과와 전략 평가\n");
-        sb.append("- newsResponseAnalysis: 이벤트 뉴스 대응 평가 (수혜주 파악, 타이밍)\n");
+        sb.append("- newsResponseAnalysis: 이벤트 뉴스 대응 + 일상 뉴스 감성 판단 정확도 평가 "
+                + "(수혜주 파악, 타이밍, 호재/악재 구분 능력)\n");
         sb.append("- riskManagementAnalysis: 포트폴리오 분산, 현금 비중, 손절/익절 타이밍 평가\n");
         sb.append("- improvementSuggestions: 구체적 개선 방안 3~5개 (한 문자열, 줄바꿈으로 구분)\n");
         return sb.toString();
+    }
+
+    /**
+     * S-2: 이벤트 3건 외 일상 뉴스 감성 판단의 정오 이력을 리포트 입력에 포함.
+     * 정답지가 {@code EventStockImpact} 에만 의존하지 않도록 채점 근거를 넓힌다.
+     */
+    private void appendJudgmentAccuracy(StringBuilder sb, SimulationSession session) {
+        List<UserNewsProgress> judged = userNewsProgressRepository.findJudgedByUserInPeriod(
+                session.getUser().getUserId(), session.getStartDate(), session.getEndDate());
+
+        sb.append("== 개별 뉴스 감성 판단 정확도 (기간 내 학습한 일상 뉴스 포함) ==\n");
+        if (judged.isEmpty()) {
+            sb.append("- 기간 내 감성 판단 이력 없음\n\n");
+            return;
+        }
+
+        long total = judged.size();
+        long correct = judged.stream().filter(UserNewsProgress::isCorrect).count();
+        sb.append(String.format("- 판단한 뉴스 %d건 중 정답 %d건 (정확도 %.0f%%)\n",
+                total, correct, 100.0 * correct / total));
+
+        for (NewsSentiment s : NewsSentiment.values()) {
+            long picked = judged.stream().filter(p -> p.getUserSentiment() == s).count();
+            if (picked == 0) {
+                continue;
+            }
+            long hit = judged.stream().filter(p -> p.getUserSentiment() == s && p.isCorrect()).count();
+            sb.append(String.format("  - %s(으)로 판단: %d건 중 %d건 정답\n", s.getDescription(), picked, hit));
+        }
+
+        List<UserNewsProgress> misses = judged.stream()
+                .filter(p -> !p.isCorrect())
+                .limit(5)
+                .collect(Collectors.toList());
+        if (!misses.isEmpty()) {
+            sb.append("  대표 오답:\n");
+            for (UserNewsProgress p : misses) {
+                sb.append(String.format("    - %s %s — 사용자: %s / 실제: %s\n",
+                        p.getNewsArticle().getArticleDate(), p.getNewsArticle().getTitle(),
+                        p.getUserSentiment().getDescription(), p.getAiSentiment().getDescription()));
+            }
+        }
+        sb.append("\n");
     }
 }
