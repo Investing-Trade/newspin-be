@@ -16,12 +16,14 @@ import org.gp.newspinbe.domain.user.repository.UserRepository;
 import org.gp.newspinbe.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * S-2. 개별 뉴스 감성 판단의 정오 이력이 남고, 리포트 채점용 기간 조회가 동작한다.
  * (이벤트 3건에만 의존하던 정답지를 일상 뉴스 판단까지 넓히는 입력.)
  */
 @IntegrationTest
+@Transactional // 시드 뉴스 카운트를 오염시키지 않도록 테스트마다 롤백
 class NewsJudgmentAccuracyTest {
 
     @Autowired NewsService newsService;
