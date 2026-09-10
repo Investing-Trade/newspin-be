@@ -25,6 +25,7 @@ public class RestClientConfig {
         return RestClient.builder()
                 .baseUrl("https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel)
                 .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("Accept", "application/json")
                 .requestFactory(factory)
                 .build();
     }

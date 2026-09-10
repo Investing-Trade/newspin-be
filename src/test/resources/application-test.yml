@@ -37,7 +37,7 @@ spring:
 # 외부 연동은 테스트에서 호출하지 않는다 (값만 채워 컨텍스트 로드용).
 gemini:
   api-key: test
-  model: gemini-2.5-flash
+  model: gemini-3.5-flash
 ai-service:
   url: http://localhost:1
 server:

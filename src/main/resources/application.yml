@@ -65,7 +65,7 @@ management:
 
 gemini:
   api-key: ${GEMINI_API_KEY}
-  model: gemini-2.5-flash
+  model: gemini-3.5-flash
 
 ai-service:
   url: ${AI_SERVICE_URL}
@@ -120,7 +120,7 @@ management:
 
 gemini:
   api-key: ${GEMINI_API_KEY:dummy}
-  model: gemini-2.5-flash
+  model: gemini-3.5-flash
 
 ai-service:
   url: ${AI_SERVICE_URL:http://localhost:8000}

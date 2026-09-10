@@ -29,11 +29,13 @@
 
 ## ③ 검증
 
-- **로컬 실 Gemini**: 제공받은 API 키가 `CONSUMER_SUSPENDED` (정지) 상태라 실제 구조화 응답은
-  확인 못 함. 단, C-4 방어가 동작해 **403 → fallback, 리포트는 200 + 4개 섹션** 정상 반환 확인.
+- **로컬 실 Gemini (2026-09-10, 새 키 + `gemini-3.5-flash`)**: `/simulation/sessions/{id}/report`
+  → 4개 섹션 모두 실제 구조화 분석 응답. 마커 파싱 없이 `responseSchema` JSON 을 `readValue` 한 줄로 파싱.
+  - 예: "총자산 10,000,000 → 10,006,325 (0.06%)… 현금 비중 99.2%… 포트폴리오 분산 없음" 등 세션 데이터 기반 분석.
 - `InvestmentReportFallbackTest` (CI): Gemini 실패 시 리포트가 500 없이 fallback 섹션으로 반환,
   `"파싱할 수 없습니다"` 문자열 없음.
-- 유효 키 확보 시 실제 구조화 응답 + 파싱 실패율 측정 필요 (TODO).
+- 연결 관련 별도 수정(별도 PR): 모델 갱신(`gemini-2.5-flash` 는 신규 키에 404), `Accept` 헤더,
+  `application/octet-stream` 응답 대응, 재시도 4회.
 
 ## ④ 회고
 
