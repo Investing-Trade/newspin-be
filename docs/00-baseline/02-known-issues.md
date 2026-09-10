@@ -38,7 +38,7 @@
 | I-8 | `SecurityConfig` CORS, `application.yml` | 환경 분리 없음 | `application-prod.yml` + 환경변수 origin |
 | I-9 | `SimulationSession.advanceDay()/reset()` | 서비스 레이어와 중복된 데드코드 | 삭제 또는 엔티티로 로직 응집 |
 | I-10 | 목록 API (`/simulation/sessions`, `/trades`, 뉴스) | 페이지네이션 없음 | `Slice`/`Page` |
-| I-11 | `InvestmentReportController` 등 | 리포트 생성이 동기, 긴 Gemini 호출 | `@Async` + 상태 폴링, 또는 타임아웃 UX |
+| I-11 | `InvestmentReportController` 등 | 리포트 생성이 동기, 긴 Gemini 호출 | ✅ 해소 — `@Async` + `investment_report` 상태 폴링 ([S3](../improvements/S3-report-async.md)) |
 | I-12 | 전역 | 관측성 부재 (메트릭·traceId·구조화 로깅 없음) | Actuator + Micrometer + MDC |
 | I-13 | 전역 | 테스트 없음 | Testcontainers 통합 + 단위 |
 | I-14 | 전역 | CI 없음 | GitHub Actions build+test |
@@ -46,7 +46,7 @@
 | I-16 | `GlobalExceptionHandler` | validation 에러가 필드별 메시지 없이 뭉뚱그림, `ErrorCode.message` 비-final | 응답 표준화 |
 | I-17 | jjwt 0.11.5 | deprecated API (`parserBuilder` 등) | 0.12.x 마이그레이션 |
 | I-18 | `RedisConfig` | `@Value` 로 `RedisConnectionFactory` 를 직접 생성 → Spring Boot 오토컨피그(`spring.data.redis.*` 바인딩, `@ServiceConnection`, health)를 우회. `spring.data.redis.host` 등에 기본값이 없어 환경변수 미설정 시 컨텍스트 로드 실패 | 커스텀 팩토리 제거, 오토컨피그된 `RedisConnectionFactory` 사용, `RedisTemplate` 커스터마이징만 유지 |
-| I-19 | `InvestmentReportService.generateReport` | 클래스 `@Transactional(readOnly=true)` 안에서 Gemini HTTP 호출(수십 초 가능) → R-1 과 같은 커넥션 홀딩 | 데이터 수집·프롬프트 빌드(lazy 접근)는 트랜잭션 안에서, Gemini 호출은 밖에서 |
+| I-19 | `InvestmentReportService.generateReport` | 클래스 `@Transactional(readOnly=true)` 안에서 Gemini HTTP 호출(수십 초 가능) → R-1 과 같은 커넥션 홀딩 | ✅ 해소 — I-11 에서 Gemini 호출을 별도 스레드/트랜잭션(`ReportGenerator`)으로 분리 ([S3](../improvements/S3-report-async.md)) |
 
 ## 구조적 이슈 (설계 레벨)
 
