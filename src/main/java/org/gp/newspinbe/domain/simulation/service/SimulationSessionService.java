@@ -2,8 +2,6 @@ package org.gp.newspinbe.domain.simulation.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.gp.newspinbe.domain.simulation.domain.AssetHistory;
 import org.gp.newspinbe.domain.simulation.domain.SimulationSession;
@@ -64,14 +62,12 @@ public class SimulationSessionService {
         }
     }
 
-    public List<SessionResponse> getMySessionList(Long userId) {
+    public org.springframework.data.domain.Page<SessionResponse> getMySessionList(
+            Long userId, org.springframework.data.domain.Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        return sessionRepository.findByUserOrderByCreatedAtDesc(user)
-                .stream()
-                .map(SessionResponse::from)
-                .collect(Collectors.toList());
+        return sessionRepository.findByUser(user, pageable).map(SessionResponse::from);
     }
 
     public SessionResponse getSessionDetail(Long sessionId, Long userId) {

@@ -1,6 +1,5 @@
 package org.gp.newspinbe.domain.simulation.controller;
 
-import java.util.List;
 
 import org.gp.newspinbe.domain.simulation.dto.request.SessionCreateRequest;
 import org.gp.newspinbe.domain.simulation.dto.response.DayResponse;
@@ -8,7 +7,11 @@ import org.gp.newspinbe.domain.simulation.dto.response.SessionResponse;
 import org.gp.newspinbe.domain.simulation.service.NextDayService;
 import org.gp.newspinbe.domain.simulation.service.SimulationSessionService;
 import org.gp.newspinbe.global.common.ApiResponse;
+import org.gp.newspinbe.global.common.PageResponse;
 import org.gp.newspinbe.global.security.CustomUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -80,10 +83,11 @@ public class SimulationSessionController {
         }
 
         @GetMapping
-        public ResponseEntity<ApiResponse<List<SessionResponse>>> getMySessionList(
-                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-                List<SessionResponse> response = sessionService.getMySessionList(
-                                userDetails.getUser().getUserId());
+        public ResponseEntity<ApiResponse<PageResponse<SessionResponse>>> getMySessionList(
+                        @AuthenticationPrincipal CustomUserDetails userDetails,
+                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+                PageResponse<SessionResponse> response = PageResponse.from(
+                                sessionService.getMySessionList(userDetails.getUser().getUserId(), pageable));
 
                 return ResponseEntity.ok(ApiResponse.success(response));
         }
