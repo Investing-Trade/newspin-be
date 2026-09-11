@@ -43,9 +43,11 @@ class EmailFlowTest {
 
     private static final String PW = "pw1234!@";
 
+    /** "인증번호: XXXXXX" / "비밀번호 재설정 인증번호: XXXXXX" 뒤 6자리 코드 추출. */
     private String extractCode(MimeMessage message) throws Exception {
         String body = GreenMailUtil.getBody(message);
-        return body.substring(body.length() - 6); // "인증번호: XXXXXX" 끝 6자리
+        String[] parts = body.trim().split(":\\s*");
+        return parts[parts.length - 1].trim();
     }
 
     @Test
@@ -60,6 +62,7 @@ class EmailFlowTest {
         assertThat(messages[0].getAllRecipients()[0].toString()).isEqualTo(email);
 
         String code = extractCode(messages[0]);
+        assertThat(code).hasSize(6);
         EmailVerificationResponse verified = userService.verifyEmail(email, code);
         assertThat(verified.getVerified()).isTrue();
 
@@ -89,6 +92,7 @@ class EmailFlowTest {
         assertThat(messages[0].getSubject()).contains("비밀번호");
 
         String code = extractCode(messages[0]);
+        assertThat(code).hasSize(6);
         String newPassword = "newpw123!";
         userService.resetPassword(new PasswordResetRequest(email, code, newPassword));
 
