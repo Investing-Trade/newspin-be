@@ -49,7 +49,7 @@ public enum ErrorCode {
 
 	private final HttpStatus status;
 	private final String code;
-	private String message;
+	private final String message;
 
 	ErrorCode(final String code, final String message, final HttpStatus status) {
 		this.status = status;

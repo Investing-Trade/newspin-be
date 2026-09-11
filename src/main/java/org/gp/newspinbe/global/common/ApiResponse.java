@@ -32,4 +32,9 @@ public class ApiResponse<T> {
 	public static <T> ApiResponse<T> error(String code, String message) {
 		return new ApiResponse<>("error", code, message, null);
 	}
+
+	/** 필드별 검증 오류처럼, 에러 응답에도 상세 데이터를 함께 실어야 할 때(I-16). */
+	public static <T> ApiResponse<T> error(String code, String message, T data) {
+		return new ApiResponse<>("error", code, message, data);
+	}
 }
