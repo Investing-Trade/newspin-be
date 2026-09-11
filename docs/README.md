@@ -7,9 +7,11 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 
 | 문서 | 내용 |
 | --- | --- |
-| [00-baseline/01-architecture.md](00-baseline/01-architecture.md) | 착수 시점(2026-09) 아키텍처 스냅샷 |
+| [00-baseline/01-architecture.md](00-baseline/01-architecture.md) | 착수 시점(2026-09) 아키텍처 스냅샷 (Before) |
+| [current-architecture.md](current-architecture.md) | 스테이지 0~4 완료 시점 아키텍처 스냅샷 (After) |
 | [00-baseline/02-known-issues.md](00-baseline/02-known-issues.md) | 발견된 문제 인벤토리 (심각 / 위험 / 개선) |
 | [00-baseline/03-improvement-roadmap.md](00-baseline/03-improvement-roadmap.md) | 실행 순서와 단계별 목표 |
+| [00-baseline/04-final-summary.md](00-baseline/04-final-summary.md) | 최종 Before/After 요약 (전 항목) |
 | [improvements/_TEMPLATE.md](improvements/_TEMPLATE.md) | 개선 항목 1건당 문서 템플릿 |
 | [adr/](adr/) | 아키텍처 의사결정 기록(ADR) |
 | [benchmarks/](benchmarks/) | 부하 테스트 스크립트와 측정 원본 |
