@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,5 +42,26 @@ class GlobalExceptionHandlerTest {
         assertThat(body.getData())
                 .containsEntry("email", "이메일 형식이 올바르지 않습니다.")
                 .containsEntry("password", "비밀번호는 8자 이상이어야 합니다.");
+    }
+
+    /**
+     * 로그인 실패(잘못된 비밀번호/존재하지 않는 이메일)가 이 핸들러 없이는 catch-all(Exception.class)로
+     * 떨어져 500 "서버 내부 오류가 발생했습니다."로 응답했다 — newspin-web 실사용 테스트 중 발견.
+     * BadCredentialsException/UsernameNotFoundException 모두 AuthenticationException 의
+     * 하위 타입이라 한 핸들러로 둘 다 잡힌다(계정 존재 여부를 구분해 노출하지 않는 게 보안상 맞음).
+     */
+    @Test
+    void 로그인_실패는_401과_전용_메시지로_응답한다() {
+        ResponseEntity<ApiResponse<Void>> wrongPassword =
+                handler.handleAuthenticationException(new BadCredentialsException("bad credentials"));
+        ResponseEntity<ApiResponse<Void>> noSuchUser =
+                handler.handleAuthenticationException(new UsernameNotFoundException("no such user"));
+
+        for (ResponseEntity<ApiResponse<Void>> response : java.util.List.of(wrongPassword, noSuchUser)) {
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getCode()).isEqualTo(ErrorCode.LOGIN_FAILED.getCode());
+            assertThat(response.getBody().getMessage()).isEqualTo("이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
     }
 }

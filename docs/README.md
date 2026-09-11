@@ -70,6 +70,7 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | R2-1 | validation 에러 응답 표준화 | I-16 | 개선 | ✅ | [round2](improvements/round2-validation-error-format.md) |
 | R2-2 | jjwt 0.11.5 → 0.12.x 마이그레이션 | I-17 | 개선 | ✅ | [round2](improvements/round2-jjwt-migration.md) |
 | R2-3 | 이메일 발송 하드코딩 제거 (newspin-web 연동 중 발견) | I-20 (신규) | 개선 | ✅ | [round2](improvements/round2-email-smtp-config.md) |
+| R2-4 | 로그인 실패 에러 메시지 (newspin-web 연동 중 발견) | I-21 (신규) | 개선 | ✅ | [round2](improvements/round2-login-error-message.md) |
 
 상태 범례: ⬜ 대기 · 🚧 진행 중 · ✅ 완료 · ⏸ 보류
 
