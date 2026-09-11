@@ -59,6 +59,7 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 20 | 목록 API 페이지네이션 | I-10 | 개선 | ✅ | [S3](improvements/S3-list-pagination.md) |
 | 21 | 리포트 생성 비동기화 | I-11 | 개선 | ✅ | [S3](improvements/S3-report-async.md) |
 | 22 | 학습-평가 사일로 완화 | S-2 | 개선 | ✅ | [S3](improvements/S3-learning-eval-silo.md) |
+| S4 | API 문서(Swagger) 정리 | - | 마감 | ✅ | [S4](improvements/S4-swagger-docs.md) |
 
 상태 범례: ⬜ 대기 · 🚧 진행 중 · ✅ 완료 · ⏸ 보류
 

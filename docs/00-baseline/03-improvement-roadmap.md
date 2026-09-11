@@ -55,5 +55,6 @@
 
 ## 스테이지 4 — 마감
 
-- API 문서(Swagger) 정리, `docs/00-baseline` 대비 최종 Before/After 요약
-- 아키텍처 다이어그램 갱신, README 재작성
+- [x] API 문서(Swagger) 정리 ([S4](../improvements/S4-swagger-docs.md))
+- [ ] `docs/00-baseline` 대비 최종 Before/After 요약
+- [ ] 아키텍처 다이어그램 갱신, README 재작성
