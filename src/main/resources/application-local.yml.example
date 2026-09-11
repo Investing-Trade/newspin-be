@@ -15,7 +15,12 @@ spring:
       password:
   jwt:
     secret: <base64-encoded 32+ byte secret>
+  # docker-compose 의 Mailpit(가짜 SMTP, localhost:1025)을 그대로 써도 된다 — 그러면
+  # 이 블록은 dev 프로필과 동일하게 auth/starttls 를 꺼야 한다. 실제 계정을 쓰려면
+  # host/port 를 그 공급자 값으로, auth/starttls 는 true 로 채운다.
   mail:
+    host: <smtp host>
+    port: <smtp port>
     username: <smtp user>
     password: <smtp password>
 

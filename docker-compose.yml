@@ -1,4 +1,4 @@
-# 로컬 개발용 인프라 (MySQL + Redis).
+# 로컬 개발용 인프라 (MySQL + Redis + Mailpit).
 # 기존 네이티브 MySQL(3306)/redis(6379)와 충돌하지 않도록 포트를 옮겨 노출한다.
 #   docker compose up -d
 #   ./gradlew bootRun --args='--spring.profiles.active=dev'
@@ -32,6 +32,20 @@ services:
       - "6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # 가짜 SMTP — 이메일 인증/비밀번호 재설정 메일을 실제 발송 없이 로컬에서 확인.
+  # 발송된 메일은 http://localhost:8025 웹 UI에서 바로 볼 수 있다.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: newspin-mailpit
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025/api/v2/info"]
       interval: 5s
       timeout: 3s
       retries: 20

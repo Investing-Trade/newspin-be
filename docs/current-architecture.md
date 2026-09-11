@@ -6,7 +6,7 @@
 ## 런타임 구성
 
 ```
-[newspin-fe : React/Vite, localhost:5173]
+[newspin-web : Vite/React/TS, localhost:5173] (newspin-fe 는 참고용, 실사용 안 함)
         │  REST + JWT(Bearer)
         ▼
 [newspin-be : Spring Boot 4.0.1, Java 25]
@@ -14,6 +14,8 @@
    │                    Flyway 로 스키마 버전 관리 (V1 baseline, V2 investment_report, V3 user_news_judgment)
    ├── Redis         — JWT refresh token(디바이스별 키) / 이메일 인증코드 / 시세 조회 캐시(@Cacheable, TTL)
    │                    RedisConnectionFactory 는 Spring Boot 오토컨피그 사용 (I-18)
+   ├── Mail          — 이메일 인증/비밀번호 재설정. JavaMailSender 는 오토컨피그(spring.mail.*) 사용 (I-20)
+   │                    dev: docker-compose Mailpit(가짜 SMTP, :1025/웹UI :8025) / prod: env var로 실제 공급자
    ├── Gemini API    — GeminiService, RestClient 기반. JSON 스키마 강제 + 재시도(backoff) + 서킷 없음(외부 API 특성상 재시도/폴백으로 대응)
    │                    비동기 호출(ReportGenerator, @Async) — 리포트 생성은 응답 경로 밖
    ├── Resilience4j  — newspin-ai 호출 경로에 circuitbreaker + retry (aiAnalysis)
@@ -70,7 +72,10 @@
 - CORS origin: `newspin.cors.allowed-origins` 환경변수 (프로필별 분리, I-8).
 - `ddl-auto`: dev/local `update`, prod `validate` (R-6).
 - Swagger 문서의 `SecurityRequirement` 가 `SecurityConfig.PERMIT_ALL_PATTERNS` 와 1:1 대응 (S4).
-- 그대로: STATELESS, CSRF/폼로그인 비활성, JWT access 24h/refresh 3d, jjwt 0.11.5(I-17, 미해결 — deprecated API 이지만 동작 영향 없음).
+- jjwt 0.11.5 → 0.12.6 (I-17, 라운드 2). deprecated API(`parserBuilder` 등) 전면 교체, 동작 변경 없음.
+- 이메일 인증/비밀번호 재설정 발송이 `EmailConfig`의 하드코딩된 `smtp.gmail.com` 때문에 항상 실패하던 것
+  해소 (I-20, 라운드 2) — 오토컨피그된 `JavaMailSender` 사용, `dev`는 Mailpit, `prod`는 env var로 실제 공급자 지정.
+- 그대로: STATELESS, CSRF/폼로그인 비활성, JWT access 24h/refresh 3d.
 
 ## 영속성 현황 (변경분)
 
