@@ -56,10 +56,10 @@
 | 이슈 | Before | After |
 | --- | --- | --- |
 | I-16 validation 에러 | 필드별 메시지 없이 `"유효성 검사가 실패했습니다."`로 통합, 에러코드는 매직 스트링 `"400"`, `ErrorCode.message`가 `final` 아님 | `ApiResponse.data`에 `{필드명: 메시지}`, 코드 `C002`(`ErrorCode.INVALID_INPUT_VALUE`)로 통일, `message` `final`화 ([round2](../improvements/round2-validation-error-format.md)) |
+| I-17 jjwt 버전 | 0.11.5, deprecated API(`parserBuilder`/`setSigningKey`/`SignatureAlgorithm` 등) | 0.12.6, `Jwts.parser().verifyWith()`/`parseSignedClaims()` 등 신규 API로 전면 교체 ([round2](../improvements/round2-jjwt-migration.md)) |
 
 ## 범위 밖으로 남긴 것 (의도적)
 
-- **I-17** jjwt 0.11.5 deprecated API(`parserBuilder` 등) — 동작에는 영향 없음, 라이브러리 메이저 업그레이드라 별도 작업으로 남김(라운드 2 남은 항목).
 - **S-3** 정답지(`EventStockImpact`)-시세 정합성 — 시드 데이터 파이프라인 영역, `newspin-be` 코드 개선 범위 밖.
 - `newspin-ai` 레포는 원칙대로 코드 변경하지 않음 (BE↔AI 계약 변경은 전부 BE 쪽에서 흡수).
 

@@ -44,7 +44,7 @@
 | I-14 | 전역 | CI 없음 | GitHub Actions build+test |
 | I-15 | `Dockerfile` vs `build.gradle` | JDK 21 vs 25 불일치 | 통일 |
 | I-16 | `GlobalExceptionHandler` | validation 에러가 필드별 메시지 없이 뭉뚱그림, `ErrorCode.message` 비-final | ✅ 해소 — `ApiResponse.data`에 필드별 메시지, `message`도 `final`로 ([라운드 2](../improvements/round2-validation-error-format.md)) |
-| I-17 | jjwt 0.11.5 | deprecated API (`parserBuilder` 등) | 0.12.x 마이그레이션 |
+| I-17 | jjwt 0.11.5 | deprecated API (`parserBuilder` 등) | ✅ 해소 — 0.12.6 로 갱신, API 전면 교체 ([라운드 2](../improvements/round2-jjwt-migration.md)) |
 | I-18 | `RedisConfig` | `@Value` 로 `RedisConnectionFactory` 를 직접 생성 → Spring Boot 오토컨피그(`spring.data.redis.*` 바인딩, `@ServiceConnection`, health)를 우회. `spring.data.redis.host` 등에 기본값이 없어 환경변수 미설정 시 컨텍스트 로드 실패 | 커스텀 팩토리 제거, 오토컨피그된 `RedisConnectionFactory` 사용, `RedisTemplate` 커스터마이징만 유지 |
 | I-19 | `InvestmentReportService.generateReport` | 클래스 `@Transactional(readOnly=true)` 안에서 Gemini HTTP 호출(수십 초 가능) → R-1 과 같은 커넥션 홀딩 | ✅ 해소 — I-11 에서 Gemini 호출을 별도 스레드/트랜잭션(`ReportGenerator`)으로 분리 ([S3](../improvements/S3-report-async.md)) |
 
