@@ -45,7 +45,7 @@ services:
       - "1025:1025" # SMTP
       - "8025:8025" # Web UI
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8025/api/v2/info"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025/api/v1/info"]
       interval: 5s
       timeout: 3s
       retries: 20
