@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -59,6 +60,20 @@ public class GlobalExceptionHandler {
 		log.warn("Data integrity violation (동시 요청 등): {}", e.getMostSpecificCause().getMessage());
 		return ResponseEntity.status(HttpStatus.CONFLICT)
 			.body(ApiResponse.error("C409", "이미 처리 중이거나 처리된 요청입니다. 잠시 후 다시 시도해주세요."));
+	}
+
+	/**
+	 * UserService.signIn 이 잘못된 이메일/비밀번호로 AuthenticationManager.authenticate(...) 를
+	 * 호출하면 Spring Security 가 BadCredentialsException(AuthenticationException 의 하위) 을
+	 * 던진다. 이 핸들러가 없으면 catch-all(Exception.class) 로 떨어져 500 "서버 내부 오류가
+	 * 발생했습니다."로 응답했다 — 클라이언트 입력 문제인데 서버 오류처럼 보였음.
+	 */
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException e) {
+		log.warn("로그인 실패: {}", e.getMessage());
+		ErrorCode errorCode = ErrorCode.LOGIN_FAILED;
+		return ResponseEntity.status(errorCode.getStatus())
+			.body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
 	}
 
 	@ExceptionHandler(CustomException.class)
