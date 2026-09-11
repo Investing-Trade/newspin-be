@@ -47,6 +47,7 @@
 | I-17 | jjwt 0.11.5 | deprecated API (`parserBuilder` 등) | ✅ 해소 — 0.12.6 로 갱신, API 전면 교체 ([라운드 2](../improvements/round2-jjwt-migration.md)) |
 | I-18 | `RedisConfig` | `@Value` 로 `RedisConnectionFactory` 를 직접 생성 → Spring Boot 오토컨피그(`spring.data.redis.*` 바인딩, `@ServiceConnection`, health)를 우회. `spring.data.redis.host` 등에 기본값이 없어 환경변수 미설정 시 컨텍스트 로드 실패 | 커스텀 팩토리 제거, 오토컨피그된 `RedisConnectionFactory` 사용, `RedisTemplate` 커스터마이징만 유지 |
 | I-19 | `InvestmentReportService.generateReport` | 클래스 `@Transactional(readOnly=true)` 안에서 Gemini HTTP 호출(수십 초 가능) → R-1 과 같은 커넥션 홀딩 | ✅ 해소 — I-11 에서 Gemini 호출을 별도 스레드/트랜잭션(`ReportGenerator`)으로 분리 ([S3](../improvements/S3-report-async.md)) |
+| I-20 | `EmailConfig` (신규 발견 — 착수 시점 인벤토리엔 없었음, `newspin-web` 연동 중 발견) | `JavaMailSender` Bean을 직접 생성하며 `smtp.gmail.com:587` 하드코딩 → 오토컨피그가 접혀 `spring.mail.host/port/properties.*` 전부 무시됨(I-18과 같은 유형). 이메일 인증·비밀번호 재설정이 사실상 항상 실패 | ✅ 해소 — `EmailConfig` 삭제, 오토컨피그된 `JavaMailSender` 사용 + docker-compose Mailpit(dev) ([라운드 2](../improvements/round2-email-smtp-config.md)) |
 
 ## 구조적 이슈 (설계 레벨)
 

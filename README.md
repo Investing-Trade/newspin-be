@@ -19,7 +19,7 @@
 ## 로컬 실행
 
 ```bash
-docker compose up -d                      # MySQL(3307), Redis(6380)
+docker compose up -d                      # MySQL(3307), Redis(6380), Mailpit(1025/8025)
 cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
 # application-local.yml 에 jwt.secret / gemini.api-key 등 채우기 (git 추적 안 됨)
 GEMINI_API_KEY=<키> ./gradlew bootRun --args='--spring.profiles.active=dev'
@@ -31,11 +31,14 @@ GEMINI_API_KEY=<키> ./gradlew bootRun --args='--spring.profiles.active=dev'
   `application-local.yml`로만 관리한다.
 - 최초 기동 시 Flyway 마이그레이션(`src/main/resources/db/migration/`)이 자동 적용되고,
   `SeedRunner` 가 `tools/seed/data/`(종목·뉴스·이벤트·시세)를 적재한다.
+- 이메일 인증/비밀번호 재설정은 `dev` 프로필에서 실제 발송 없이 Mailpit(가짜 SMTP)으로 간다 —
+  발송된 메일은 `http://localhost:8025`에서 확인.
 
 서버 기동 후:
 - API: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - Actuator: `http://localhost:8080/actuator/health`, `/actuator/prometheus`
+- Mailpit(발송 메일 확인): `http://localhost:8025`
 
 ## 테스트
 

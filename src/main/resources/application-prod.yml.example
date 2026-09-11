@@ -22,7 +22,11 @@ spring:
       password: ${REDIS_PASSWORD}
   jwt:
     secret: ${JWT_SECRET_KEY}
+  # 예: Gmail 이면 host=smtp.gmail.com, 계정 2단계 인증 켠 뒤 "앱 비밀번호"를
+  # SPRING_MAIL_PASSWORD 로 발급(일반 로그인 비밀번호 아님). 다른 공급자도 host/port 만 바꾸면 됨.
   mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
     username: ${SPRING_MAIL_USERNAME}
     password: ${SPRING_MAIL_PASSWORD}
 
