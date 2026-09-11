@@ -13,8 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "종목 시세", description = "기준일까지의 주가 히스토리 조회. 기준일 이후 시세는 절대 반환하지 않는다(lookahead 차단, C-5). Redis 캐시 적용(I-3).")
+@SecurityRequirement(name = "bearer")
 @RestController
 @RequestMapping("/stocks")
 @RequiredArgsConstructor
@@ -22,7 +27,7 @@ public class StockController {
 
     private final StockService stockService;
 
-    // 특정 종목의 기준일까지의 주가 히스토리 (기준일 이후 시세는 반환하지 않음 — C-5)
+    @Operation(summary = "특정 종목 주가 히스토리 조회", description = "기준일(date)까지 최대 11거래일치 시세를 반환한다.")
     @GetMapping("/{stockCode}/price-range")
     public ResponseEntity<ApiResponse<StockPriceHistoryResponse>> getStockPriceHistoryRange(
             @PathVariable String stockCode,
@@ -31,7 +36,7 @@ public class StockController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 전체 종목의 기준일까지의 주가 히스토리 (비교용)
+    @Operation(summary = "전체 종목 주가 히스토리 조회", description = "기준일(date)까지 전체 종목의 시세를 한 번에 반환한다(종목 간 비교용).")
     @GetMapping("/price-range")
     public ResponseEntity<ApiResponse<List<StockPriceHistoryResponse>>> getAllStocksPriceHistoryRange(
             @RequestParam LocalDate date) {
