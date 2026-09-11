@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
-import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
 import jakarta.mail.internet.MimeMessage;
@@ -43,9 +42,13 @@ class EmailFlowTest {
 
     private static final String PW = "pw1234!@";
 
-    /** "인증번호: XXXXXX" / "비밀번호 재설정 인증번호: XXXXXX" 뒤 6자리 코드 추출. */
+    /**
+     * "인증번호: XXXXXX" / "비밀번호 재설정 인증번호: XXXXXX" 뒤 6자리 코드 추출.
+     * 본문이 한글이라 Content-Transfer-Encoding 이 base64 로 붙는다 — {@code GreenMailUtil.getBody}
+     * 는 그 raw 값을 그대로 반환해(디코딩 안 됨) 대신 {@code message.getContent()} 로 읽는다.
+     */
     private String extractCode(MimeMessage message) throws Exception {
-        String body = GreenMailUtil.getBody(message);
+        String body = (String) message.getContent();
         String[] parts = body.trim().split(":\\s*");
         return parts[parts.length - 1].trim();
     }
