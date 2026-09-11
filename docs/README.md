@@ -68,7 +68,7 @@ AI 레포(`newspin-ai`)는 원칙적으로 건드리지 않고, BE 중심으로 
 | 순서 | 항목 | 이슈 | 분류 | 상태 | 문서 · PR |
 | --- | --- | --- | --- | --- | --- |
 | R2-1 | validation 에러 응답 표준화 | I-16 | 개선 | ✅ | [round2](improvements/round2-validation-error-format.md) |
-| R2-2 | jjwt 0.11.5 → 0.12.x 마이그레이션 | I-17 | 개선 | ⬜ | - |
+| R2-2 | jjwt 0.11.5 → 0.12.x 마이그레이션 | I-17 | 개선 | ✅ | [round2](improvements/round2-jjwt-migration.md) |
 
 상태 범례: ⬜ 대기 · 🚧 진행 중 · ✅ 완료 · ⏸ 보류
 

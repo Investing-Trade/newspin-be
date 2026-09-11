@@ -1,11 +1,12 @@
 package org.gp.newspinbe.global.security.jwt;
 
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.Collection;
+
+import javax.crypto.SecretKey;
 
 import org.gp.newspinbe.global.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,18 +23,18 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
+/** I-17: jjwt 0.11.5(deprecated `parserBuilder`/`setSigningKey` 등) → 0.12.x API 로 갱신. */
 @Slf4j
 @Component
 public class JwtTokenProvider {
 
 	private final RedisUtil redisUtil;
-	private final Key key;
+	private final SecretKey key;
 	private final UserDetailsService userDetailsService;
 
 	private static final String GRANT_TYPE = "Bearer";
@@ -84,20 +85,20 @@ public class JwtTokenProvider {
 
 	private String generateAccessToken(String username, String authorities, Date expireDate) {
 		return Jwts.builder()
-				.setSubject(username)
+				.subject(username)
 				.claim("auth", authorities)
-				.setExpiration(expireDate)
-				.signWith(key, SignatureAlgorithm.HS256)
+				.expiration(expireDate)
+				.signWith(key)
 				.compact();
 	}
 
 	private String generateRefreshToken(String username, Date expireDate) {
 		return Jwts.builder()
-				.setId(java.util.UUID.randomUUID().toString()) // jti — 같은 ms 에 발급돼도 토큰이 유일하도록
-				.setSubject(username)
-				.setIssuedAt(new Date())
-				.setExpiration(expireDate)
-				.signWith(key, SignatureAlgorithm.HS256)
+				.id(java.util.UUID.randomUUID().toString()) // jti — 같은 ms 에 발급돼도 토큰이 유일하도록
+				.subject(username)
+				.issuedAt(new Date())
+				.expiration(expireDate)
+				.signWith(key)
 				.compact();
 	}
 
@@ -119,11 +120,11 @@ public class JwtTokenProvider {
 
 	private Claims parseClaims(String accessToken) {
 		try {
-			return Jwts.parserBuilder()
-					.setSigningKey(key)
+			return Jwts.parser()
+					.verifyWith(key)
 					.build()
-					.parseClaimsJws(accessToken)
-					.getBody();
+					.parseSignedClaims(accessToken)
+					.getPayload();
 		} catch (ExpiredJwtException e) {
 			return e.getClaims();
 		}
@@ -131,10 +132,10 @@ public class JwtTokenProvider {
 
 	public boolean validateToken(String token) {
 		try {
-			Jwts.parserBuilder()
-					.setSigningKey(key)
+			Jwts.parser()
+					.verifyWith(key)
 					.build()
-					.parseClaimsJws(token);
+					.parseSignedClaims(token);
 
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
@@ -165,11 +166,11 @@ public class JwtTokenProvider {
 
 	public String getUserNameFromToken(String token) {
 		try {
-			Claims claims = Jwts.parserBuilder()
-					.setSigningKey(key)
+			Claims claims = Jwts.parser()
+					.verifyWith(key)
 					.build()
-					.parseClaimsJws(token)
-					.getBody();
+					.parseSignedClaims(token)
+					.getPayload();
 
 			return claims.getSubject();
 		} catch (ExpiredJwtException e) {
